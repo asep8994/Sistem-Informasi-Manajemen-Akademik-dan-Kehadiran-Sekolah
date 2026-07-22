@@ -1,0 +1,216 @@
+# Product Requirements Document (PRD)
+## Penyempurnaan Frontend — Sistem Absensi & Kedisiplinan Sekolah
+
+| | |
+|---|---|
+| **Versi Dokumen** | 1.0 |
+| **Tanggal** | 14 Juli 2026 |
+| **Status** | Draft |
+| **Dokumen Terkait** | PRD-Sistem-Absensi-Sekolah.md (PRD utama produk) |
+| **Fokus Dokumen** | Perbaikan & penyempurnaan sisi frontend (UI/UX & arsitektur kode) |
+
+---
+
+## 1. Ringkasan
+
+Dokumen ini fokus khusus pada **penyempurnaan frontend** dari aplikasi Sistem Absensi Sekolah yang saat ini berbentuk satu file HTML (`indeks.html`) berbasis Bootstrap 5 dengan penyimpanan `localStorage`. Tujuannya adalah merapikan struktur, meningkatkan pengalaman pengguna (UX), memperbaiki konsistensi tampilan, serta menyiapkan frontend agar siap terhubung ke backend multi-tenant (dibahas di PRD utama Bagian 12).
+
+Dokumen ini **tidak membahas ulang** kebutuhan fungsional bisnis (sudah ada di PRD utama) — fokusnya murni pada **bagaimana antarmuka dan kode frontend disempurnakan**.
+
+## 2. Tujuan Penyempurnaan
+
+- Merapikan struktur kode frontend agar mudah dipelihara (saat ini seluruh HTML, CSS, dan JS ada dalam satu file besar).
+- Meningkatkan konsistensi visual (warna, tipografi, jarak/spacing, komponen).
+- Mengganti pola notifikasi `alert()`/`confirm()` bawaan browser dengan komponen UI yang lebih baik.
+- Meningkatkan aksesibilitas (accessibility) dan pengalaman di perangkat mobile/tablet.
+- Menyiapkan frontend agar siap dihubungkan ke API backend (menggantikan akses langsung ke `localStorage`).
+- Menstandarkan validasi form dan penanganan error di seluruh halaman.
+- **Memastikan frontend siap dipakai oleh banyak sekolah sekaligus (multi-tenant)** — tidak ada elemen tampilan yang di-hardcode untuk satu sekolah tertentu, dan setiap sekolah hanya melihat data serta identitas visualnya sendiri.
+
+## 3. Kondisi Frontend Saat Ini (Baseline)
+
+| Aspek | Kondisi Saat Ini |
+|---|---|
+| **Struktur file** | 1 file HTML tunggal (~2000 baris) berisi HTML, CSS (`<style>`), dan JavaScript (`<script>`) sekaligus |
+| **Framework UI** | Bootstrap 5.3 + Bootstrap Icons, tanpa framework JS (vanilla JS dengan manipulasi DOM langsung/`innerHTML`) |
+| **State/Data** | Variabel global `appData`, dibaca/ditulis langsung ke `localStorage` di banyak fungsi |
+| **Notifikasi/Konfirmasi** | Menggunakan `alert()` dan `confirm()` bawaan browser (mengganggu UX, tidak bisa distyling, memblokir thread) |
+| **Navigasi** | Sidebar dengan `switchPage()` yang menyembunyikan/menampilkan elemen `div` (bukan routing berbasis URL) |
+| **Validasi Form** | Validasi manual per fungsi (mis. cek `nama` kosong), tidak konsisten di semua form |
+| **Responsivitas** | Mengandalkan grid Bootstrap; sidebar punya toggle mobile, namun belum diuji mendalam di berbagai ukuran layar |
+| **Aksesibilitas** | Belum ada perhatian eksplisit pada ARIA label, kontras warna, navigasi keyboard |
+| **Branding/Identitas Sekolah** | Nama sekolah ("SMP N 20 Depok") di-**hardcode** langsung di teks HTML (judul halaman, halaman login, sidebar, header) — belum dinamis per sekolah |
+| **Rendering** | Banyak fungsi `render...()` membangun ulang seluruh `innerHTML` dari template string — berisiko lambat saat data banyak |
+
+## 4. Target Pengguna & Konteks Pemakaian
+
+| Pengguna | Perangkat Umum | Kebutuhan UX Utama |
+|---|---|---|
+| Guru/Wali kelas | Laptop sekolah, kadang tablet/HP saat presensi di kelas | Input cepat, minim klik, jelas status tersimpan |
+| Admin sekolah | Laptop/PC di ruang TU | Kemudahan kelola data massal (kelas, siswa) |
+| (Masa depan) Super Admin | Laptop/PC | Kejelasan status antrian approval sekolah baru |
+
+## 5. Prinsip & Arah Desain
+
+- **Kejelasan di atas dekorasi** — warna dan visual mendukung pemahaman status (hadir/sakit/izin/alfa), bukan sekadar hiasan.
+- **Minim friksi saat input data berulang** — presensi harian dan input pelanggaran adalah aktivitas rutin; harus secepat mungkin.
+- **Konsisten** — satu jenis komponen (tombol, modal, badge status) tampil sama di semua halaman.
+- **Aman dari kesalahan** — aksi destruktif (hapus siswa/kelas) selalu perlu konfirmasi yang jelas, tidak asal `confirm()` polos.
+
+### 5.1 Sistem Desain (Design Tokens)
+
+| Token | Nilai Saat Ini | Catatan |
+|---|---|---|
+| Warna utama (brand) | `#0f4c81` (biru navy) | Dipertahankan — sudah mencerminkan identitas sekolah/institusi |
+| Warna sukses | `#16803c` | Untuk status "Hadir" |
+| Warna bahaya | `#b42318` | Untuk status "Alfa"/hapus data |
+| Warna aksen | `#0e7490` | Untuk elemen info/sekunder |
+| Font | Segoe UI / system-ui | Dipertahankan untuk kompatibilitas lintas OS |
+| Radius komponen | 8–10px | Konsisten di tombol, kartu, form |
+
+Rekomendasi: dokumentasikan token ini secara eksplisit di file konfigurasi/CSS variables terpisah (bukan tersebar sebagai nilai hex di banyak tempat), agar mudah diubah secara terpusat.
+
+## 6. Kebutuhan Fungsional Frontend per Halaman
+
+### 6.1 Halaman Login
+- FE-1: Form login dengan validasi input kosong sebelum submit (saat ini hanya validasi setelah klik tombol).
+- FE-2: Pesan error ditampilkan inline di bawah form (bukan `alert()`), agar tidak mengganggu alur.
+- FE-3: Indikator loading saat proses login berjalan (penting saat sudah terhubung ke backend/API).
+- FE-3a *(multi-tenant)*: Halaman login harus **mengetahui sekolah mana yang dituju** sebelum validasi username/password — melalui salah satu dari: (a) subdomain per sekolah, atau (b) field "Kode Sekolah" pada form login. Backend hanya memvalidasi username/password **dalam lingkup sekolah tersebut**.
+- FE-3b *(multi-tenant)*: Nama, logo, dan warna tema sekolah pada halaman login **diambil secara dinamis** dari data sekolah (bukan teks statis "SMP N 20 Depok"), agar guru/admin dari sekolah manapun merasa aplikasi memang milik sekolah mereka.
+- FE-3c *(multi-tenant)*: Pesan error khusus untuk kasus sekolah belum disetujui/nonaktif (mis. "Sekolah Anda masih menunggu persetujuan"), bukan disamakan dengan pesan "username/password salah".
+
+### 6.2 Dashboard
+- FE-4: Statistik ringkas (total siswa, rata-rata hadir, sakit/izin/alfa) ditampilkan sebagai kartu dengan status loading skeleton saat data belum siap.
+- FE-5: Grafik kehadiran (Chart.js) responsif — tetap terbaca di layar sempit (tablet/HP).
+- FE-6: Empty state yang jelas ketika belum ada data presensi sama sekali (bukan tampilan kosong tanpa penjelasan).
+
+### 6.3 Presensi
+- FE-7: Tabel presensi mendukung aksi cepat per baris (klik status langsung berubah, tanpa perlu buka modal).
+- FE-8: Indikator visual jelas untuk baris yang "belum diisi" vs "sudah diisi".
+- FE-9: Notifikasi sukses/gagal disimpan menggunakan toast/snackbar, bukan `alert()`, agar tidak memblokir interaksi berikutnya.
+- FE-10: Konfirmasi sebelum override presensi massal yang sudah pernah diisi, dengan penjelasan dampaknya.
+
+### 6.4 Pelanggaran
+- FE-11: Dropdown jenis pelanggaran menampilkan bobot poin secara langsung di opsi (mis. "Terlambat (−5 poin)").
+- FE-12: Riwayat pelanggaran per siswa mudah difilter (per kelas, per rentang tanggal).
+- FE-13: Modal edit/hapus pelanggaran menggunakan komponen konfirmasi konsisten dengan modal lain.
+
+### 6.5 Laporan
+- FE-14: Filter kelas & periode disatukan dalam satu panel yang jelas sebelum tombol ekspor aktif.
+- FE-15: Tombol ekspor (PDF/Excel) menampilkan status "sedang diproses" karena proses ekspor bisa memakan waktu pada data besar.
+- FE-16: Preview ringkas hasil laporan sebelum diunduh (opsional, peningkatan UX).
+
+### 6.6 Admin (Manajemen Master)
+- FE-17: Form tambah siswa massal (paste teks) menampilkan pratinjau (preview) hasil parsing sebelum disimpan, agar admin bisa mengecek kesalahan format lebih dulu.
+- FE-18: Pesan error yang spesifik (mis. baris keberapa yang gagal diimpor), bukan hanya jumlah total berhasil.
+- FE-19: Konfirmasi hapus kelas/siswa menjelaskan secara eksplisit data apa saja yang ikut terhapus (presensi & pelanggaran terkait) — sudah ada di versi awal, dipertahankan tapi tampilannya diperjelas (bukan `confirm()` polos).
+- FE-19a *(notifikasi orang tua)*: Form tambah/edit siswa menyertakan kolom nomor WhatsApp & email orang tua, dengan validasi format sebelum disimpan (mis. format nomor WA diawali "62" atau "0").
+- FE-19b *(notifikasi orang tua)*: Daftar siswa menampilkan indikator kecil jika kontak orang tua belum lengkap (mis. ikon peringatan), agar admin mudah menindaklanjuti.
+- FE-19c *(notifikasi orang tua)*: Panel pengaturan saluran notifikasi default sekolah (WA/Email/keduanya), dengan opsi mengedit template pesan untuk kejadian kehadiran dan pelanggaran.
+
+### 6.7 Notifikasi Orang Tua — Status Pengiriman
+- FE-24: Setiap kejadian presensi (Sakit/Izin/Alfa) dan pelanggaran yang tersimpan menampilkan indikator kecil status notifikasi (terkirim/gagal/menunggu), agar guru langsung tahu apakah orang tua sudah diberi tahu.
+- FE-25: Halaman/log riwayat notifikasi (dapat difilter per siswa, per tanggal, per status) untuk admin menelusuri notifikasi yang gagal terkirim.
+- FE-26: Tombol "Kirim Ulang" pada notifikasi yang berstatus gagal.
+- FE-27: Saat menyimpan presensi/pelanggaran, tampilkan toast terpisah yang menjelaskan status pengiriman notifikasi (mis. "Presensi tersimpan. 2 notifikasi terkirim, 1 gagal (kontak tidak valid)"), bukan disatukan dengan pesan sukses simpan data.
+
+### 6.8 Panel Super Admin *(khusus mendukung banyak sekolah)*
+- FE-20: Halaman daftar sekolah dengan status (menunggu/aktif/nonaktif) dan aksi approve/tolak/nonaktifkan — mengikuti pola desain yang sama dengan halaman Admin sekolah agar terasa konsisten.
+- FE-21: Form/antrean persetujuan sekolah baru menampilkan data pendaftaran (nama sekolah, NPSN, kontak admin) dengan jelas sebelum Super Admin menekan Setuju/Tolak.
+- FE-22: Notifikasi (badge/counter) di sidebar Super Admin untuk jumlah pendaftaran sekolah yang masih menunggu persetujuan.
+- FE-23: Tampilan ringkas jumlah sekolah aktif & statistik pemakaian dasar (opsional, untuk pemantauan pertumbuhan produk).
+
+## 7. Kebutuhan Non-Fungsional Frontend
+
+| Kategori | Kebutuhan |
+|---|---|
+| **Responsivitas** | Seluruh halaman berfungsi baik di lebar layar 360px (HP) hingga desktop; sidebar collapse otomatis di layar sempit |
+| **Aksesibilitas** | Kontras warna teks memenuhi WCAG AA minimum; seluruh tombol ikon punya label aria; navigasi bisa dilakukan via keyboard (tab/enter) |
+| **Kinerja rendering** | Hindari re-render seluruh tabel/daftar saat hanya 1 data berubah; gunakan pembaruan sebagian (partial update) untuk daftar siswa/presensi yang panjang |
+| **Konsistensi lintas browser** | Diuji minimal di Chrome, Edge, Firefox terbaru |
+| **Pemeliharaan kode** | Kode dipisah menjadi modul-modul (mis. per halaman/fitur), bukan satu file monolitik, agar mudah dikembangkan tim |
+
+## 8. Perubahan Arsitektur Frontend (Usulan)
+
+Struktur saat ini (1 file HTML) cukup untuk prototipe, tapi menyulitkan pengembangan lanjutan (terutama saat harus terhubung ke API multi-tenant). Usulan bertahap:
+
+| Tahap | Perubahan |
+|---|---|
+| **Tahap 1 — Perapian (tanpa ubah teknologi)** | Pisahkan CSS ke file terpisah, pisahkan JS per modul fungsi (login, dashboard, presensi, pelanggaran, laporan, admin), ganti `alert()`/`confirm()` dengan komponen modal/toast custom |
+| **Tahap 2 — Migrasi ke Framework Komponen** | Pindah ke framework modern (mis. React atau Vue) agar UI berbasis komponen reusable (Button, Table, Modal, Toast, FormField) dan lebih mudah diuji |
+| **Tahap 3 — Integrasi API** | Ganti seluruh akses `localStorage` langsung dengan pemanggilan API ke backend (lihat PRD utama Bagian 12), termasuk penanganan loading state & error state di setiap layar |
+
+## 9. Standarisasi Komponen UI
+
+Komponen berikut perlu distandarkan sebagai "komponen bersama" (dipakai ulang di banyak halaman, bukan ditulis ulang tiap kali):
+
+- **Button** — varian primary/secondary/danger, dengan status loading.
+- **Modal konfirmasi** — satu komponen umum untuk semua aksi hapus/konfirmasi (bukan `confirm()` bawaan browser).
+- **Toast/Notifikasi** — pengganti `alert()`, muncul sebentar di pojok layar, tidak memblokir interaksi.
+- **Badge status** — untuk status kehadiran (H/S/I/A) dan status sekolah (menunggu/aktif/nonaktif), warna konsisten.
+- **Tabel data** — dengan pola header, sorting, dan empty state yang seragam.
+- **Form field** — input dengan label, pesan error inline, dan validasi konsisten.
+
+## 10. Prioritas Perbaikan (Roadmap Frontend)
+
+| Prioritas | Item |
+|---|---|
+| Tinggi | Ganti `alert()`/`confirm()` dengan komponen toast & modal konfirmasi kustom |
+| Tinggi | Pisahkan CSS & JS dari satu file HTML menjadi modul-modul terpisah |
+| Tinggi | Hilangkan seluruh konten hardcode nama sekolah, ganti dengan branding dinamis per sekolah (lihat Bagian 11.1) |
+| Tinggi | Preview hasil parsing saat impor siswa massal |
+| Sedang | Perbaikan responsivitas & aksesibilitas (kontras, aria-label, navigasi keyboard) |
+| Sedang | Migrasi ke framework komponen (React/Vue) |
+| Sedang | Loading state & skeleton di dashboard dan laporan |
+| Rendah | Panel Super Admin (menyusul kebutuhan backend multi-tenant) |
+
+## 11. Kesiapan Frontend untuk Banyak Sekolah (Multi-Tenant)
+
+Agar frontend benar-benar bisa dipakai banyak sekolah sekaligus (bukan hanya backend-nya), ada beberapa kebutuhan tambahan yang harus disiapkan di sisi tampilan dan kode frontend.
+
+### 11.1 Tidak Ada Lagi Konten yang Di-hardcode per Sekolah
+Semua tempat yang saat ini berisi teks tetap "SMP N 20 Depok" (judul tab browser, halaman login, sidebar, header) harus diganti menjadi **variabel dinamis** yang diisi dari data sekolah yang sedang login:
+
+| Elemen | Sebelumnya (hardcode) | Sesudah (dinamis) |
+|---|---|---|
+| Judul tab browser | "Sistem Absensi Sekolah - SMP N 20 Depok" | `Sistem Absensi Sekolah - {nama_sekolah}` |
+| Judul di halaman login | "SMP N 20 Depok" | `{nama_sekolah}` dari hasil deteksi sekolah (subdomain/kode sekolah) |
+| Brand sidebar | "SMP N 20 Depok" | `{nama_sekolah}` + `{logo_sekolah}` (jika ada) |
+| Header nama sekolah | "SMP N 20 Depok" | `{nama_sekolah}` |
+
+### 11.2 Konteks Sekolah (Tenant Context) di State Frontend
+Setelah login, frontend perlu menyimpan **konteks sekolah aktif** (id sekolah, nama, logo) di state aplikasi — bukan cuma data user seperti sekarang — dan konteks ini dipakai untuk:
+- Menyisipkan identitas sekolah di header setiap request ke API.
+- Menentukan tampilan branding (nama, logo, warna jika kustomisasi tema per sekolah diperlukan).
+- Mencegah data sekolah lain "bocor" ke tampilan meskipun secara tidak sengaja — frontend tetap harus defensif walau isolasi utama ada di backend (lihat PRD utama Bagian 12.4).
+
+### 11.3 Deteksi Sekolah Sebelum Login
+Dua pendekatan yang bisa dipilih (didiskusikan bersama tim backend, lihat PRD utama Bagian 12.5):
+
+| Pendekatan | Dampak ke Frontend |
+|---|---|
+| **Subdomain per sekolah** (`sekolahA.namaaplikasi.com`) | Frontend membaca subdomain saat halaman dimuat untuk menentukan sekolah, sebelum menampilkan form login |
+| **Kode sekolah di form login** | Frontend menambahkan field "Kode Sekolah" pada form login (lihat FE-3a) |
+
+Rekomendasi: pendekatan subdomain memberi pengalaman lebih rapi (guru tidak perlu mengingat kode sekolah), tapi butuh sedikit lebih banyak persiapan infrastruktur (routing/DNS). Kode sekolah lebih cepat diimplementasikan di tahap awal.
+
+### 11.4 Halaman/Status Tambahan Terkait Alur Sekolah
+- **Halaman "Pendaftaran Sekolah"** — form publik untuk sekolah baru mendaftar (nama, NPSN, kontak admin), terpisah dari halaman login.
+- **Status "Menunggu Persetujuan"** — jika sekolah mencoba login sebelum disetujui Super Admin, tampilkan halaman status yang jelas, bukan pesan error generik.
+- **Status "Nonaktif"** — jika akun sekolah dinonaktifkan Super Admin, pengguna dari sekolah tersebut melihat pesan yang jelas saat mencoba login.
+
+### 11.5 Pengujian Lintas Sekolah (Multi-Tenant Testing)
+Sebelum rilis, frontend perlu diuji dengan **minimal 2 akun sekolah berbeda** secara bersamaan (mis. dua tab browser berbeda) untuk memastikan:
+- Data yang tampil di dashboard, presensi, pelanggaran, dan laporan benar-benar hanya milik sekolah yang sedang login.
+- Branding (nama, logo) yang tampil sesuai sekolah yang login, tidak tertinggal dari sesi sebelumnya (terutama setelah logout-login berganti sekolah di browser yang sama).
+
+## 12. Metrik Keberhasilan UX
+
+- Berkurangnya jumlah klik untuk menyelesaikan presensi 1 kelas (baseline saat ini → target).
+- Tidak ada lagi penggunaan `alert()`/`confirm()` bawaan browser di seluruh alur utama.
+- Aplikasi tetap dapat digunakan dengan nyaman di layar HP (lebar ≥360px) tanpa elemen terpotong.
+- Waktu render halaman dengan >200 siswa tetap terasa instan (<300ms perubahan UI setelah aksi).
+
+---
+*Dokumen ini melengkapi PRD utama (PRD-Sistem-Absensi-Sekolah.md) dan sebaiknya dibaca bersamaan, khususnya Bagian 12 (Multi-Tenant) yang memengaruhi Tahap 3 pada Bagian 8 dokumen ini.*
