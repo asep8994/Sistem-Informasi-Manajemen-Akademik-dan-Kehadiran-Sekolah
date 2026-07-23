@@ -15,9 +15,17 @@ export default function MapelNilaiView() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [newAssessmentName, setNewAssessmentName] = useState('');
 
-    const mapelName = currentUser?.mapelName || 'Mata Pelajaran';
-    const assignedIds = currentUser?.classes || [];
-    const assignedClasses = currentSchool?.classes.filter(c => assignedIds.includes(c.id)) || [];
+    const userAny = currentUser as any;
+    const mapelName = currentUser?.mapelName || userAny?.subjectName || 'Mata Pelajaran';
+    const assignedIds = (Array.isArray(currentUser?.classes) && currentUser.classes.length > 0)
+        ? currentUser.classes
+        : (Array.isArray(userAny?.assignedClassIds) && userAny.assignedClassIds.length > 0)
+        ? userAny.assignedClassIds
+        : [];
+    let assignedClasses = currentSchool?.classes.filter(c => assignedIds.includes(c.id)) || [];
+    if (assignedClasses.length === 0 && currentSchool?.classes) {
+        assignedClasses = currentSchool.classes;
+    }
 
     useEffect(() => {
         if (!currentSchool || !currentUser) return;

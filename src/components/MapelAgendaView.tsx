@@ -12,9 +12,17 @@ export default function MapelAgendaView() {
     const [topic, setTopic] = useState('');
     const [notes, setNotes] = useState('');
 
-    const mapelName = currentUser?.mapelName || 'Mata Pelajaran';
-    const assignedIds = currentUser?.classes || [];
-    const assignedClasses = currentSchool?.classes.filter(c => assignedIds.includes(c.id)) || [];
+    const userAny = currentUser as any;
+    const mapelName = currentUser?.mapelName || userAny?.subjectName || 'Mata Pelajaran';
+    const assignedIds = (Array.isArray(currentUser?.classes) && currentUser.classes.length > 0)
+        ? currentUser.classes
+        : (Array.isArray(userAny?.assignedClassIds) && userAny.assignedClassIds.length > 0)
+        ? userAny.assignedClassIds
+        : [];
+    let assignedClasses = currentSchool?.classes.filter(c => assignedIds.includes(c.id)) || [];
+    if (assignedClasses.length === 0 && currentSchool?.classes) {
+        assignedClasses = currentSchool.classes;
+    }
 
     useEffect(() => {
         if (assignedClasses.length > 0) setSelectedClassId(assignedClasses[0].id);

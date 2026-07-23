@@ -40,7 +40,7 @@ export const defaultData: AppData = {
             nilaiMapelConfig: {},
             users: [
                 { id: 'usr-admin-s1', username: 'admin', password: 'admin123', role: 'admin', name: 'Admin SMP N 20 Depok' },
-                { id: 'usr-guru-s1', username: 'guru', password: 'guru123', role: 'guru_mapel', name: 'Guru SMP N 20 Depok' },
+                { id: 'usr-guru-s1', username: 'guru', password: 'guru123', role: 'guru_mapel', name: 'Guru SMP N 20 Depok', mapelName: 'Matematika', classes: ['c1', 'c2'] },
                 { id: 'usr-walas-s1', username: 'walas', password: 'walas123', role: 'walas', classId: 'c1', name: 'Wali Kelas 7-A (SMP 20)' },
                 { id: 'usr-bk-s1', username: 'guru_bk', password: 'bk123', role: 'guru_bk', name: 'Guru BK SMP N 20 Depok' },
                 { id: 'usr-piket-s1', username: 'piket', password: 'piket123', role: 'guru_piket', name: 'Guru Piket SMP N 20 Depok' }

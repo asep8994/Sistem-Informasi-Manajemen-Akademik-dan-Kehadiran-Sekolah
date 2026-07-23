@@ -20,7 +20,8 @@ import {
     FileSpreadsheet,
     Activity,
     CheckCircle2,
-    Sparkles
+    Sparkles,
+    CalendarDays
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
@@ -171,119 +172,264 @@ export default function DashboardView() {
     // ----------------------------------------------------
     if (currentUser.role === 'guru_mapel') {
         const userAny = currentUser as any;
-        const assignedClasses = currentSchool.classes.filter(c => 
-            Array.isArray(userAny.assignedClassIds) && userAny.assignedClassIds.includes(c.id)
-        );
+        
+        let assignedIds: string[] = [];
+        if (Array.isArray(userAny.classes) && userAny.classes.length > 0) {
+            assignedIds = userAny.classes;
+        } else if (Array.isArray(userAny.assignedClassIds) && userAny.assignedClassIds.length > 0) {
+            assignedIds = userAny.assignedClassIds;
+        } else if (userAny.classId) {
+            assignedIds = [userAny.classId];
+        }
 
-        const myAgendas = currentSchool.agendaMapel?.filter(a => (a as any).teacherId === currentUser.id || a.username === currentUser.username) || [];
-        const mapelName = userAny.subjectName || 'Mata Pelajaran';
+        let assignedClasses = currentSchool.classes.filter(c => assignedIds.includes(c.id));
 
-        const mapelGoToPage = (page: string, classId: string) => {
-            sessionStorage.setItem('mapel_pref_class', classId);
+        // Fallback: If no specific class filter set, show all school classes so teacher isn't blocked
+        if (assignedClasses.length === 0 && currentSchool.classes.length > 0) {
+            assignedClasses = currentSchool.classes;
+        }
+
+        const myAgendas = currentSchool.agendaMapel?.filter(a => (a as any).teacherId === currentUser.id || (a as any).username === currentUser.username) || [];
+        const myNilai = currentSchool.nilaiMapel?.filter(n => (n as any).teacherId === currentUser.id || (n as any).username === currentUser.username) || [];
+        const mapelName = userAny.mapelName || userAny.subjectName || 'Mata Pelajaran';
+
+        const totalStudentsCount = currentSchool.students.filter(s => 
+            assignedClasses.some(c => c.id === s.classId)
+        ).length;
+
+        const todayStr = new Date().toISOString().slice(0, 10);
+
+        const mapelGoToPage = (page: string, classId?: string) => {
+            if (classId) {
+                sessionStorage.setItem('mapel_pref_class', classId);
+            }
             setActivePage(page);
         };
 
+        // Stat cards for Guru Mapel
+        const mapelCards = [
+            { title: 'Kelas Ampuan', value: `${assignedClasses.length} Kelas`, icon: BookOpen, gradient: 'from-indigo-500/10 to-purple-500/10 border-indigo-200 text-indigo-700', sub: 'Total Kelas Aktif' },
+            { title: 'Siswa Diajar', value: `${totalStudentsCount} Siswa`, icon: Users, gradient: 'from-cyan-500/10 to-blue-500/10 border-cyan-200 text-cyan-700', sub: 'Terdaftar di Kelas' },
+            { title: 'Agenda Terisi', value: `${myAgendas.length} Jurnal`, icon: CalendarDays, gradient: 'from-emerald-500/10 to-teal-500/10 border-emerald-200 text-emerald-700', sub: 'Catatan Mengajar' },
+            { title: 'Nilai Evaluasi', value: `${myNilai.length} Entri`, icon: Award, gradient: 'from-amber-500/10 to-orange-500/10 border-amber-200 text-amber-700', sub: 'Rekap Nilai Tugas' },
+        ];
+
         return (
             <div className="space-y-6">
-                <div className="bg-gradient-to-r from-slate-900 via-[#0b2f4d] to-slate-900 rounded-2xl border border-indigo-500/30 p-6 shadow-lg text-white">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                
+                {/* Header Banner for Guru Mapel */}
+                <div className="bg-gradient-to-r from-slate-900 via-[#0b2f4d] to-indigo-950 rounded-2xl border border-indigo-500/30 p-6 shadow-xl text-white">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold mb-2 border border-indigo-500/30">
                                 <GraduationCap className="h-3.5 w-3.5 text-indigo-300" />
-                                <span>Pengajar: {mapelName}</span>
+                                <span>Mata Pelajaran: {mapelName}</span>
                             </div>
-                            <h3 className="text-xl font-black tracking-tight">Dashboard Guru Mata Pelajaran</h3>
-                            <p className="text-xs text-slate-300 mt-1">Kelola presensi jam mapel, jurnal mengajar agenda kelas, dan nilai siswa.</p>
+                            <h3 className="text-xl sm:text-2xl font-black tracking-tight">Dashboard Pengajaran Mapel</h3>
+                            <p className="text-xs text-slate-300 mt-1">Kelola presensi jam mapel, jurnal agenda mengajar harian, dan evaluasi nilai siswa.</p>
+                        </div>
+
+                        {/* Quick Action Buttons for Guru Mapel */}
+                        <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0">
+                            <button
+                                onClick={() => mapelGoToPage('mapel-absensi')}
+                                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md active:scale-95 transition-all cursor-pointer"
+                            >
+                                <ClipboardCheck className="h-3.5 w-3.5" />
+                                <span>Absen Jam Mapel</span>
+                            </button>
+                            <button
+                                onClick={() => mapelGoToPage('mapel-agenda')}
+                                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md active:scale-95 transition-all cursor-pointer"
+                            >
+                                <CalendarDays className="h-3.5 w-3.5" />
+                                <span>Agenda Mengajar</span>
+                            </button>
+                            <button
+                                onClick={() => mapelGoToPage('mapel-nilai')}
+                                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md active:scale-95 transition-all cursor-pointer"
+                            >
+                                <Award className="h-3.5 w-3.5" />
+                                <span>Input Nilai</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
+                {/* Metric Stat Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {mapelCards.map((card, i) => {
+                        const Icon = card.icon;
+                        return (
+                            <div
+                                key={i}
+                                className={`bg-gradient-to-br ${card.gradient} bg-white rounded-2xl border p-4 shadow-sm flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer`}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{card.title}</span>
+                                    <div className="h-7 w-7 rounded-lg bg-white/80 p-1.5 shadow-sm border border-slate-100 flex items-center justify-center">
+                                        <Icon className="h-4 w-4" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight">{card.value}</h3>
+                                    <span className="text-[9px] font-bold text-slate-400 mt-0.5 block">{card.sub}</span>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Grid Ampuan Kelas & Timeline Agenda */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Classes Grid */}
                     <div className="lg:col-span-7 space-y-4">
-                        <h4 className="text-xs font-bold text-slate-700 flex items-center gap-2">
-                            <BookOpen className="h-4 w-4 text-cyan-600" />
-                            <span>Daftar Kelas Ampuan Anda</span>
-                        </h4>
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                                <BookOpen className="h-4 w-4 text-cyan-600" />
+                                <span>Daftar Kelas Ampuan Anda</span>
+                            </h4>
+                            <span className="text-[10px] text-slate-400 font-semibold">{assignedClasses.length} Kelas Terdaftar</span>
+                        </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {assignedClasses.map(kelas => {
                                 const classStudents = currentSchool.students.filter(s => s.classId === kelas.id);
+                                const todayMapelAbsensi = currentSchool.absensiMapel?.[todayStr]?.[kelas.id] || {};
+                                const isAbsenFilled = Object.keys(todayMapelAbsensi).length > 0;
+
                                 return (
-                                    <div key={kelas.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between">
+                                    <div key={kelas.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-indigo-500/40 hover:shadow-md transition-all flex flex-col justify-between group">
                                         <div>
                                             <div className="flex items-center justify-between mb-2">
-                                                <h5 className="text-base font-bold text-slate-800">Kelas {kelas.name}</h5>
-                                                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
-                                                    Mapel
+                                                <h5 className="text-base font-black text-slate-800 group-hover:text-indigo-600 transition-colors">Kelas {kelas.name}</h5>
+                                                {isAbsenFilled ? (
+                                                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                                                        <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                                                        Sudah Absen
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1">
+                                                        <Clock className="h-3 w-3 text-amber-600" />
+                                                        Belum Absen
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="space-y-1 mt-3">
+                                                <p className="text-xs text-slate-500 flex items-center gap-1 font-semibold">
+                                                    <GraduationCap className="h-3.5 w-3.5 text-indigo-600" />
+                                                    <span>{mapelName}</span>
+                                                </p>
+                                                <span className="inline-flex rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
+                                                    👥 {classStudents.length} Siswa
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1">
-                                                <GraduationCap className="h-3.5 w-3.5 text-cyan-600" />
-                                                <span>{mapelName}</span>
-                                            </p>
-                                            <span className="inline-flex rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 mt-3">
-                                                {classStudents.length} Siswa
-                                            </span>
                                         </div>
-                                        <div className="mt-4 flex flex-col gap-1.5">
+
+                                        <div className="mt-5 grid grid-cols-3 gap-1.5">
                                             <button
                                                 onClick={() => mapelGoToPage('mapel-absensi', kelas.id)}
-                                                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-[10px] py-2 transition-all shadow-sm active:scale-95 cursor-pointer"
+                                                className="flex flex-col items-center justify-center gap-1 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-bold text-[9px] py-2 border border-cyan-200 transition-all cursor-pointer active:scale-95"
+                                                title="Presensi Jam Mapel"
                                             >
-                                                <ClipboardCheck className="h-3.5 w-3.5" />
-                                                Absen Mapel
+                                                <ClipboardCheck className="h-3.5 w-3.5 text-cyan-600" />
+                                                <span>Absen</span>
+                                            </button>
+                                            <button
+                                                onClick={() => mapelGoToPage('mapel-agenda', kelas.id)}
+                                                className="flex flex-col items-center justify-center gap-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[9px] py-2 border border-indigo-200 transition-all cursor-pointer active:scale-95"
+                                                title="Isi Agenda Jurnal Kelas"
+                                            >
+                                                <CalendarDays className="h-3.5 w-3.5 text-indigo-600" />
+                                                <span>Agenda</span>
                                             </button>
                                             <button
                                                 onClick={() => mapelGoToPage('mapel-nilai', kelas.id)}
-                                                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 transition-all shadow-sm active:scale-95 cursor-pointer"
+                                                className="flex flex-col items-center justify-center gap-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[9px] py-2 border border-emerald-200 transition-all cursor-pointer active:scale-95"
+                                                title="Input Evaluasi Nilai"
                                             >
-                                                <Award className="h-3.5 w-3.5" />
-                                                Input Nilai
+                                                <Award className="h-3.5 w-3.5 text-emerald-600" />
+                                                <span>Nilai</span>
                                             </button>
                                         </div>
                                     </div>
                                 );
                             })}
-                        </div>
-                    </div>
 
-                    {/* Agenda History Column */}
-                    <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <h4 className="text-xs font-bold text-slate-700 flex items-center gap-2 mb-3">
-                                <History className="h-4 w-4 text-cyan-600" />
-                                <span>Agenda Mengajar Terakhir</span>
-                            </h4>
-                        </div>
-
-                        <div className="flex-1 divide-y divide-slate-100">
-                            {myAgendas.slice(0, 4).map(agenda => {
-                                const kelas = currentSchool.classes.find(c => c.id === agenda.classId);
-                                return (
-                                    <div key={agenda.id} className="py-2.5 space-y-1">
-                                        <div className="flex justify-between items-center">
-                                            <strong className="text-slate-800 text-xs font-bold">Kelas {kelas ? kelas.name : ''}</strong>
-                                            <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                                                {agenda.date}
-                                            </span>
-                                        </div>
-                                        <p className="text-[11px] text-slate-600 truncate">
-                                            <span className="font-semibold text-slate-400">Materi:</span> {agenda.materi}
-                                        </p>
-                                    </div>
-                                );
-                            })}
-
-                            {myAgendas.length === 0 && (
-                                <div className="text-center text-slate-400 py-12 text-xs flex flex-col items-center justify-center h-full">
-                                    <BookOpen className="h-8 w-8 text-slate-300 mb-2" />
-                                    <span>Belum ada agenda mengajar dicatat.</span>
+                            {assignedClasses.length === 0 && (
+                                <div className="col-span-2 text-center text-slate-400 py-10 text-xs bg-white rounded-2xl border border-slate-200 p-6">
+                                    Anda belum ditugaskan di kelas manapun. Hubungi Admin Sekolah.
                                 </div>
                             )}
                         </div>
                     </div>
+
+                    {/* Timeline Agenda History Column */}
+                    <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                                <h4 className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                                    <History className="h-4 w-4 text-indigo-600" />
+                                    <span>Riwayat Agenda Mengajar</span>
+                                </h4>
+                                <button
+                                    onClick={() => mapelGoToPage('mapel-agenda')}
+                                    className="text-[10px] font-bold text-indigo-600 hover:underline"
+                                >
+                                    Lihat Semua &rarr;
+                                </button>
+                            </div>
+
+                            <div className="space-y-3">
+                                {myAgendas.slice(0, 5).map(agenda => {
+                                    const kelas = currentSchool.classes.find(c => c.id === agenda.classId);
+                                    return (
+                                        <div key={agenda.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1 hover:border-indigo-200 transition-colors">
+                                            <div className="flex justify-between items-center">
+                                                <strong className="text-slate-800 text-xs font-bold flex items-center gap-1.5">
+                                                    <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                                                    Kelas {kelas ? kelas.name : ''}
+                                                </strong>
+                                                <span className="text-[9px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                                                    📅 {agenda.date}
+                                                </span>
+                                            </div>
+                                            <p className="text-[11px] text-slate-700 font-semibold truncate pl-3 border-l-2 border-indigo-400">
+                                                {agenda.materi}
+                                            </p>
+                                            {agenda.catatan && (
+                                                <p className="text-[10px] text-slate-400 italic truncate pl-3">
+                                                    Catatan: {agenda.catatan}
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+
+                                {myAgendas.length === 0 && (
+                                    <div className="text-center text-slate-400 py-12 text-xs flex flex-col items-center justify-center">
+                                        <BookOpen className="h-8 w-8 text-slate-300 mb-2" />
+                                        <span className="font-semibold">Belum ada agenda mengajar dicatat.</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Bottom Action Footer */}
+                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                            <span className="text-slate-400 font-medium">Pengisian Jurnal Harian</span>
+                            <button
+                                onClick={() => mapelGoToPage('mapel-agenda')}
+                                className="font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                            >
+                                <span>Tambah Agenda baru</span>
+                                <span>&rarr;</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         );
     }
@@ -368,7 +514,7 @@ export default function DashboardView() {
                     <div>
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold mb-2 border border-cyan-500/30">
                             <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
-                            <span>Portal Smart Campus Terpadu</span>
+                            <span>Ringkasan Informasi Terpadu</span>
                         </div>
                         <h3 className="text-xl sm:text-2xl font-black tracking-tight">{headerTitle}</h3>
                         <p className="text-xs text-slate-300 mt-1">Pemantauan real-time statistik kehadiran, poin kedisiplinan BK, dan laporan otomatis.</p>

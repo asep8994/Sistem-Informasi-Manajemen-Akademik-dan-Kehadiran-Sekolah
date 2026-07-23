@@ -138,6 +138,16 @@ export default function AdminView() {
     const [newStaffMapelName, setNewStaffMapelName] = useState('');
     const [newStaffMapelClasses, setNewStaffMapelClasses] = useState<string[]>([]);
 
+    // Edit staff modal states
+    const [editingStaff, setEditingStaff] = useState<User | null>(null);
+    const [editStaffName, setEditStaffName] = useState('');
+    const [editStaffUser, setEditStaffUser] = useState('');
+    const [editStaffPass, setEditStaffPass] = useState('');
+    const [editStaffRole, setEditStaffRole] = useState<'walas' | 'guru_bk' | 'guru_piket' | 'guru_mapel' | 'admin'>('guru_piket');
+    const [editStaffWalasClassId, setEditStaffWalasClassId] = useState('');
+    const [editStaffMapelName, setEditStaffMapelName] = useState('');
+    const [editStaffMapelClasses, setEditStaffMapelClasses] = useState<string[]>([]);
+
     // Sub-tab 4: Konfigurasi states
     const [schoolName, setSchoolName] = useState('');
     const [schoolNpsn, setSchoolNpsn] = useState('');
@@ -548,6 +558,76 @@ export default function AdminView() {
         } else {
             setNewStaffMapelClasses([...newStaffMapelClasses, classId]);
         }
+    };
+
+    const handleStartEditStaff = (staff: User) => {
+        const stAny = staff as any;
+        setEditingStaff(staff);
+        setEditStaffName(staff.name || '');
+        setEditStaffUser(staff.username || '');
+        setEditStaffPass(staff.password || '');
+        setEditStaffRole(staff.role as any || 'guru_piket');
+        setEditStaffWalasClassId(staff.classId || (currentSchool?.classes[0]?.id || ''));
+        setEditStaffMapelName(stAny.mapelName || stAny.subjectName || '');
+        setEditStaffMapelClasses(Array.isArray(stAny.classes) ? stAny.classes : Array.isArray(stAny.assignedClassIds) ? stAny.assignedClassIds : []);
+    };
+
+    const toggleEditMapelClassSelection = (classId: string) => {
+        if (editStaffMapelClasses.includes(classId)) {
+            setEditStaffMapelClasses(editStaffMapelClasses.filter(id => id !== classId));
+        } else {
+            setEditStaffMapelClasses([...editStaffMapelClasses, classId]);
+        }
+    };
+
+    const handleSaveEditStaff = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingStaff || !currentSchool) return;
+
+        const name = editStaffName.trim();
+        const username = editStaffUser.trim().toLowerCase();
+        const password = editStaffPass.trim();
+
+        if (!name || !username || !password) {
+            showToast('Lengkapi Nama, Username, dan Password!', 'warning');
+            return;
+        }
+
+        const dup = currentSchool.users.find(u => u.username.toLowerCase() === username && u.id !== editingStaff.id);
+        if (dup) {
+            showToast('Username sudah digunakan akun lain!', 'warning');
+            return;
+        }
+
+        const updatedUsers = currentSchool.users.map(u => {
+            if (u.id !== editingStaff.id) return u;
+            const updated: User = {
+                ...u,
+                name,
+                username,
+                password,
+                role: editStaffRole,
+            };
+
+            if (editStaffRole === 'walas') {
+                updated.classId = editStaffWalasClassId;
+                delete (updated as any).mapelName;
+                delete (updated as any).classes;
+            } else if (editStaffRole === 'guru_mapel') {
+                (updated as any).mapelName = editStaffMapelName.trim() || 'Mata Pelajaran';
+                (updated as any).classes = editStaffMapelClasses;
+                delete updated.classId;
+            } else {
+                delete updated.classId;
+                delete (updated as any).mapelName;
+                delete (updated as any).classes;
+            }
+            return updated;
+        });
+
+        updateSchoolProperty({ users: updatedUsers });
+        setEditingStaff(null);
+        showToast(`Akun staf "${name}" berhasil diperbarui!`, 'success');
     };
 
     // ----------------------------------------------------
@@ -1755,14 +1835,24 @@ export default function AdminView() {
                                                 </span>
                                             </td>
                                             <td className="py-3 px-4 text-slate-500 font-semibold text-[10px]">{coverage}</td>
-                                            <td className="py-2 px-4 text-center">
-                                                <button
-                                                    onClick={() => handleDeleteStaff(st.id, st.name)}
-                                                    className="p-1 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded"
-                                                    disabled={st.username === 'admin'} // Protect primary admin account
-                                                >
-                                                    <Trash className="h-3.5 w-3.5" />
-                                                </button>
+                                            <td className="py-2.5 px-4 text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button
+                                                        onClick={() => handleStartEditStaff(st)}
+                                                        className="p-1 text-cyan-600 hover:text-cyan-800 hover:bg-cyan-50 rounded-lg transition-colors cursor-pointer"
+                                                        title="Edit Akun Guru & Staf"
+                                                    >
+                                                        <Pencil className="h-3.5 w-3.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteStaff(st.id, st.name)}
+                                                        className="p-1 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                                        disabled={st.username === 'admin'}
+                                                        title="Hapus Akun Staf"
+                                                    >
+                                                        <Trash className="h-3.5 w-3.5" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -1771,6 +1861,143 @@ export default function AdminView() {
                         </table>
                     </div>
                 </div>
+
+                {/* Edit Staff Modal */}
+                {editingStaff && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+                            <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Pencil className="h-4 w-4 text-cyan-600" />
+                                    <h3 className="text-sm font-bold text-slate-800">Edit Akun Guru &amp; Staf</h3>
+                                </div>
+                                <button
+                                    onClick={() => setEditingStaff(null)}
+                                    className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSaveEditStaff} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap Guru / Staf</label>
+                                    <input
+                                        type="text"
+                                        value={editStaffName}
+                                        onChange={(e) => setEditStaffName(e.target.value)}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">Username Login</label>
+                                        <input
+                                            type="text"
+                                            value={editStaffUser}
+                                            onChange={(e) => setEditStaffUser(e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">Password</label>
+                                        <input
+                                            type="text"
+                                            value={editStaffPass}
+                                            onChange={(e) => setEditStaffPass(e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-600 mb-1">Peran Pengguna (Role)</label>
+                                    <select
+                                        value={editStaffRole}
+                                        onChange={(e) => setEditStaffRole(e.target.value as any)}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
+                                    >
+                                        <option value="guru_bk">Guru Bimbingan Konseling (BK)</option>
+                                        <option value="guru_piket">Guru Piket Harian</option>
+                                        <option value="walas">Wali Kelas</option>
+                                        <option value="guru_mapel">Guru Mata Pelajaran</option>
+                                        <option value="admin">Administrator Sekolah</option>
+                                    </select>
+                                </div>
+
+                                {editStaffRole === 'walas' && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">Pilih Wali Kelas Untuk</label>
+                                        <select
+                                            value={editStaffWalasClassId}
+                                            onChange={(e) => setEditStaffWalasClassId(e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
+                                        >
+                                            {currentSchool.classes.map(c => (
+                                                <option key={c.id} value={c.id}>Kelas {c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {editStaffRole === 'guru_mapel' && (
+                                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-600 mb-1">Nama Mata Pelajaran</label>
+                                            <input
+                                                type="text"
+                                                value={editStaffMapelName}
+                                                onChange={(e) => setEditStaffMapelName(e.target.value)}
+                                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
+                                                placeholder="Misal: Matematika, Bahasa Indonesia"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-600 mb-1">Beri Hak Akses Mengajar di Kelas</label>
+                                            <div className="border border-slate-200 bg-slate-50 rounded-xl p-3 max-h-[140px] overflow-y-auto space-y-2">
+                                                {currentSchool.classes.map(c => {
+                                                    const checked = editStaffMapelClasses.includes(c.id);
+                                                    return (
+                                                        <label key={c.id} className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={checked}
+                                                                onChange={() => toggleEditMapelClassSelection(c.id)}
+                                                                className="accent-[#0f4c81]"
+                                                            />
+                                                            <span>Kelas {c.name}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditingStaff(null)}
+                                        className="flex-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-2.5 transition-all cursor-pointer"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs py-2.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                                    >
+                                        Simpan Perubahan
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }

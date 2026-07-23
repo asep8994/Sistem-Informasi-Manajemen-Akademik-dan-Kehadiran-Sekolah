@@ -266,7 +266,7 @@ export default function LandingPage() {
                         {/* Hero Badge */}
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/90 border border-cyan-500/50 text-cyan-300 text-xs font-extrabold shadow-lg shadow-cyan-500/20 backdrop-blur-md">
                             <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
-                            <span>Platform Kehadiran &amp; Kedisiplinan 3D Terpadu</span>
+                            <span>Platform Kehadiran &amp; Kedisiplinan Terpadu</span>
                         </div>
 
                         {/* Main Headline */}
