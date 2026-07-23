@@ -80,7 +80,7 @@ export default function Topbar({ onToggleSidebar }: { onToggleSidebar: () => voi
                         {getPageTitle(activePage)}
                     </h2>
                     <p className="text-[10px] text-slate-400 mt-1 font-medium hidden sm:block">
-                        {schoolName} &bull; SIMAK PRO (Sistem Informasi Manajemen Akademik &amp; Kehadiran Terpadu)
+                        {schoolName} &bull; SIMAK PRO (Sistem Informasi Manajemen Akademik dan Kedisiplinan)
                     </p>
                 </div>
             </div>

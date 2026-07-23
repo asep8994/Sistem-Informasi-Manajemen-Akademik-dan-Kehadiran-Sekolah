@@ -164,7 +164,7 @@ export default function LoginPage() {
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        let title = "SIMAK PRO - Sistem Informasi Manajemen Akademik & Kehadiran Terpadu";
+        let title = "SIMAK PRO - Sistem Informasi Manajemen Akademik dan Kedisiplinan";
         let logo = "/logo_terpusat.png";
         let name = "Sistem Terpusat";
         let matched = false;
@@ -444,7 +444,7 @@ export default function LoginPage() {
                                         PRO
                                     </span>
                                 </h1>
-                                <p className="text-[10px] text-slate-400 font-medium">Sistem Informasi Manajemen Akademik &amp; Kehadiran Terpadu</p>
+                                <p className="text-[10px] text-slate-400 font-medium">Sistem Informasi Manajemen Akademik dan Kedisiplinan</p>
                             </div>
                         </div>
 

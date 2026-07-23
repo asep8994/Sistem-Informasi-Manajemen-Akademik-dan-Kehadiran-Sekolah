@@ -124,7 +124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (currentSchool) {
             document.title = `SIMAK PRO - ${currentSchool.name}`;
         } else {
-            document.title = "SIMAK PRO - Sistem Informasi Manajemen Akademik & Kehadiran Terpadu";
+            document.title = "SIMAK PRO - Sistem Informasi Manajemen Akademik dan Kedisiplinan";
         }
     }, [currentSchool?.logo, currentSchool?.name, isMounted]);
 

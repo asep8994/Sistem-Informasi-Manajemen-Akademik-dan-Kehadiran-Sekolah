@@ -216,7 +216,7 @@ export default function LandingPage() {
                                     PRO
                                 </span>
                             </div>
-                            <p className="text-[9px] text-slate-400 font-medium hidden sm:block">Sistem Informasi Manajemen Kehadiran Sekolah</p>
+                            <p className="text-[9px] text-slate-400 font-medium hidden sm:block">Sistem Informasi Manajemen Akademik dan Kedisiplinan</p>
                         </div>
                     </div>
 
@@ -489,7 +489,7 @@ export default function LandingPage() {
                         Segala Kebutuhan Kehadiran &amp; Akademik dalam Satu Dashboard
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-400">
-                        Dirancang khusus untuk mempermudah tugas Kepala Sekolah, Admin, Guru BK, Wali Kelas, dan Guru Mata Pelajaran.
+                        Dirancang khusus untuk mempermudah tugas Admin Sekolah, Guru BK, Wali Kelas, Guru Mata Pelajaran, dan Guru Piket.
                     </p>
                 </div>
 
@@ -1107,7 +1107,7 @@ export default function LandingPage() {
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800/80 text-xs text-slate-500">
                         <div className="flex items-center gap-2">
                             <img src="/logo_terpusat.png" alt="Logo" className="h-6 w-6 object-contain" />
-                            <span className="font-bold text-slate-400">SIMAK PRO &bull; Sistem Informasi Akademik &amp; Kehadiran</span>
+                            <span className="font-bold text-slate-400">SIMAK PRO &bull; Sistem Informasi Manajemen Akademik dan Kedisiplinan</span>
                         </div>
                         <div>
                             &copy; {new Date().getFullYear()} SIMAK PRO. Hak Cipta Dilindungi Undang-Undang.

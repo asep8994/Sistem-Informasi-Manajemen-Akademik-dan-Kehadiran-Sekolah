@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SIMAK PRO - Sistem Informasi Manajemen Akademik & Kehadiran Terpadu",
+  title: "SIMAK PRO - Sistem Informasi Manajemen Akademik dan Kedisiplinan",
   description: "Platform Manajemen Presensi, Rekapitulasi Notifikasi WA Orang Tua, Pencatatan Poin Pelanggaran BK, dan Evaluasi Nilai Terpadu",
 };
 
