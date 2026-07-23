@@ -58,14 +58,17 @@ export default function Sidebar() {
             <li>
                 <button
                     onClick={() => setActivePage(page)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-xs transition-all duration-200 text-left ${
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all duration-200 text-left relative overflow-hidden cursor-pointer ${
                         isActive 
-                            ? 'bg-white text-[#0b2f4d] shadow-lg scale-[1.02]' 
+                            ? 'bg-gradient-to-r from-cyan-500/25 via-cyan-400/15 to-white/10 text-white border-l-4 border-cyan-400 shadow-md shadow-cyan-500/10 backdrop-blur-md' 
                             : 'text-slate-300 hover:bg-white/10 hover:text-white'
                     }`}
                 >
-                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#0b2f4d]' : 'text-slate-400'}`} />
+                    <Icon className={`h-4 w-4 shrink-0 transition-transform ${isActive ? 'text-cyan-300 scale-110' : 'text-slate-400'}`} />
                     <span className="truncate">{label}</span>
+                    {isActive && (
+                        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,1)]" />
+                    )}
                 </button>
             </li>
         );

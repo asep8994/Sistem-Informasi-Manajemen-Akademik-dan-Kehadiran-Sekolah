@@ -87,6 +87,7 @@ export default function Topbar({ onToggleSidebar }: { onToggleSidebar: () => voi
 
             {/* Time / Period Display */}
             <div className="flex items-center gap-2">
+
                 {currentUser.role === 'superadmin' && currentSchool && (
                     <button
                         onClick={() => {
@@ -106,7 +107,7 @@ export default function Topbar({ onToggleSidebar }: { onToggleSidebar: () => voi
                 )}
 
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200 px-3 py-1 text-[10px] font-semibold text-slate-600 shadow-sm">
-                    <Clock className="h-3.5 w-3.5 text-cyan-600" />
+                    <Clock className="h-3.5 w-3.5 text-cyan-600 animate-pulse" />
                     <span>{timeStr || 'Memuat...'}</span>
                 </span>
             </div>

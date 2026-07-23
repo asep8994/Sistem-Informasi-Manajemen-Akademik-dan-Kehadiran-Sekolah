@@ -85,7 +85,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 sessionStorage.clear();
                 setCurrentUser(null);
                 setCurrentSchoolId(null);
-                if (pathname !== '/login') {
+                if (pathname !== '/login' && pathname !== '/landing') {
                     router.push('/login');
                 }
             }
@@ -93,7 +93,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             if (currentUser) {
                 setCurrentUser(null);
             }
-            if (pathname !== '/login') {
+            if (pathname !== '/login' && pathname !== '/landing') {
                 router.push('/login');
             }
         }

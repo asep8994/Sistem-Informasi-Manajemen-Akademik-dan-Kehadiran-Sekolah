@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
     School as SchoolIcon, 
     Eye, 
@@ -24,7 +25,9 @@ import {
     Lock,
     UserCheck,
     Shield,
-    Award
+    Award,
+    Clock,
+    ShieldCheck
 } from 'lucide-react';
 import { getRawAppData, saveRawAppData } from '../../lib/state';
 import { useApp } from '../../lib/AppContext';
@@ -40,6 +43,10 @@ export default function LoginPage() {
     const [isRegister, setIsRegister] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Dynamic Time & Educational Greeting
+    const [currentTime, setCurrentTime] = useState<string>('');
+    const [greeting, setGreeting] = useState<string>('Selamat Datang');
 
     // Login fields
     const [schoolCode, setSchoolCode] = useState('');
@@ -73,7 +80,8 @@ export default function LoginPage() {
             desc: 'Kirimkan rekapitulasi presensi harian dan rincian poin pelanggaran siswa langsung ke WhatsApp atau Email Orang Tua.',
             tag: 'Integrasi WhatsApp Gateway',
             color: 'from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30',
-            image: '/promo_wa_notif.png'
+            image: '/promo_wa_notif.png',
+            icon3d: '/wa_3d_icon.png'
         },
         {
             icon: BarChart3,
@@ -81,7 +89,8 @@ export default function LoginPage() {
             desc: 'Pantau statistik kehadiran harian per kelas, rekap bulanan, serta laporan grafik persentase kehadiran siswa secara otomatis.',
             tag: 'Laporan 1-Klik',
             color: 'from-blue-500/20 to-cyan-500/20 text-cyan-400 border-cyan-500/30',
-            image: '/promo_dashboard_analytics.png'
+            image: '/promo_dashboard_analytics.png',
+            icon3d: '/analytics_3d_icon.png'
         },
         {
             icon: ShieldAlert,
@@ -89,7 +98,8 @@ export default function LoginPage() {
             desc: 'Manajemen tingkat kedisiplinan siswa, pencatatan poin pelanggaran oleh Guru BK, serta sistem peringatan dini siswa bermasalah.',
             tag: 'Manajemen BK Terpadu',
             color: 'from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30',
-            image: '/promo_bk_violations.png'
+            image: '/promo_bk_violations.png',
+            icon3d: '/bk_3d_shield.png'
         },
         {
             icon: BookOpen,
@@ -97,7 +107,8 @@ export default function LoginPage() {
             desc: 'Fasilitas khusus Guru Mata Pelajaran untuk mengisi presensi jam mapel, agenda materi kelas, dan rekapitulasi nilai tugas.',
             tag: 'Modul Guru Mapel',
             color: 'from-purple-500/20 to-indigo-500/20 text-indigo-400 border-indigo-500/30',
-            image: '/promo_mapel_agenda.png'
+            image: '/promo_mapel_agenda.png',
+            icon3d: '/hero_3d_school.png'
         }
     ];
 
@@ -115,6 +126,38 @@ export default function LoginPage() {
         setIsMounted(true);
         const data = getRawAppData();
         setAppData(data);
+
+        // Auto open registration form panel if URL contains ?mode=register or ?register=true
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('mode') === 'register' || params.get('register') === 'true') {
+                setIsRegister(true);
+            }
+        }
+    }, []);
+
+    // Live clock & educational greeting logic
+    useEffect(() => {
+        const updateClock = () => {
+            const now = new Date();
+            const hours = now.getHours();
+            let g = 'Selamat Datang';
+            if (hours >= 4 && hours < 11) g = 'Selamat Pagi, Bapak/Ibu Pendidik! 🌅';
+            else if (hours >= 11 && hours < 15) g = 'Selamat Siang, Tim Akademik! ☀️';
+            else if (hours >= 15 && hours < 18) g = 'Selamat Sore, Bapak/Ibu Guru! 🌆';
+            else g = 'Selamat Malam, Administrator! 🌙';
+
+            setGreeting(g);
+            setCurrentTime(
+                now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) + 
+                ' • ' + 
+                now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+            );
+        };
+
+        updateClock();
+        const timer = setInterval(updateClock, 1000);
+        return () => clearInterval(timer);
     }, []);
 
     // Update branding dynamically when school code changes
@@ -368,20 +411,25 @@ export default function LoginPage() {
 
     return (
         <div className="h-screen w-screen max-h-screen overflow-hidden relative font-sans text-slate-100 bg-slate-950">
-            {/* Background Image Layer - Tech Grid & Radial Glow Concept */}
+            
+            {/* Background Image Layer - School Campus Building & Tech Grid Overlay */}
             <div 
-                className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105 pointer-events-none opacity-100"
+                className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105 pointer-events-none opacity-25"
+                style={{ backgroundImage: `url('/school_building_bg.png')` }}
+            />
+            <div 
+                className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-40 mix-blend-overlay"
                 style={{ backgroundImage: `url('/tech_grid_bg.png')` }}
             />
 
-            {/* Light Frosted Vignette Overlay (Enhanced Visibility) */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/40 via-[#0b2f4d]/40 to-slate-950/60 backdrop-blur-[2px] pointer-events-none" />
+            {/* Academic Navy & Emerald Glass Vignette Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-[#0b2f4d]/80 to-slate-950/95 backdrop-blur-[3px] pointer-events-none" />
 
             {/* Main Grid Layout (Fits 100vh) */}
             <div className="relative z-10 h-full w-full grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
                 
                 {/* LEFT HERO / PROMOTIONAL PANEL (Fits 100vh without scroll) */}
-                <div className="lg:col-span-6 xl:col-span-7 h-full p-5 lg:p-8 flex flex-col justify-between border-r border-slate-800/60 overflow-hidden">
+                <div className="lg:col-span-6 xl:col-span-7 h-full p-5 lg:p-8 flex flex-col justify-between border-r border-slate-800/60 overflow-hidden relative">
                     
                     {/* Top Branding Header */}
                     <div className="flex items-center justify-between shrink-0">
@@ -399,14 +447,22 @@ export default function LoginPage() {
                                 <p className="text-[10px] text-slate-400 font-medium">Sistem Informasi Manajemen Akademik &amp; Kehadiran Terpadu</p>
                             </div>
                         </div>
+
+                        <Link
+                            href="/landing"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-[11px] font-bold text-cyan-300 transition-all shadow-sm"
+                        >
+                            <span>Landing Page</span>
+                            <ArrowRight className="h-3 w-3" />
+                        </Link>
                     </div>
 
                     {/* Middle Promo Showcase / Slider (Compact 100vh fit) */}
-                    <div className="my-auto space-y-3 py-2">
-                        
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-[11px] font-bold text-cyan-300 shadow-md">
+                    <div className="my-auto space-y-3 py-2 relative">
+
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 backdrop-blur-md border border-cyan-500/40 text-[11px] font-bold text-cyan-300 shadow-md">
                             <Zap className="h-3 w-3 text-amber-400 animate-pulse" />
-                            <span>Fitur Unggulan Sistem</span>
+                            <span>Fitur Unggulan Smart Campus</span>
                         </div>
 
                         <div className="space-y-2.5 max-w-xl">
@@ -513,14 +569,26 @@ export default function LoginPage() {
                 </div>
 
                 {/* RIGHT FORM PANEL (Fits 100vh without scroll) */}
-                <div className="lg:col-span-6 xl:col-span-5 h-full p-6 lg:p-8 flex flex-col justify-center items-center bg-slate-950/70 backdrop-blur-xl border-l border-white/10 overflow-y-auto">
+                <div className="lg:col-span-6 xl:col-span-5 h-full p-6 lg:p-8 flex flex-col justify-center items-center bg-slate-950/80 backdrop-blur-xl border-l border-slate-800/80 overflow-y-auto">
                     
-                    <div className="w-full max-w-sm space-y-4 my-auto">
+                    <div className="w-full max-w-sm space-y-3.5 my-auto">
                         
+                        {/* Dynamic Educational Greeting Banner */}
+                        <div className="rounded-2xl bg-gradient-to-r from-slate-900 to-[#0b2f4d] p-3 border border-cyan-500/30 text-center shadow-lg">
+                            <div className="text-[11px] font-bold text-cyan-300 flex items-center justify-center gap-1.5">
+                                <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
+                                <span>{greeting}</span>
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-0.5 font-medium flex items-center justify-center gap-1">
+                                <Clock className="h-3 w-3 text-emerald-400" />
+                                <span>{currentTime}</span>
+                            </div>
+                        </div>
+
                         {/* Dynamic School Branding Header */}
-                        <div className="text-center space-y-2">
+                        <div className="text-center space-y-1.5">
                             <div className="relative inline-block">
-                                <div className={`w-16 h-16 mx-auto rounded-2xl p-2 flex items-center justify-center transition-all duration-300 shadow-xl overflow-hidden ${
+                                <div className={`w-14 h-14 mx-auto rounded-2xl p-2 flex items-center justify-center transition-all duration-300 shadow-xl overflow-hidden ${
                                     activeBranding.matched 
                                         ? 'bg-white ring-4 ring-cyan-500/30 scale-105' 
                                         : 'bg-slate-800 border border-slate-700'
@@ -542,10 +610,10 @@ export default function LoginPage() {
                             </div>
 
                             <div>
-                                <h2 className="text-lg font-bold text-white tracking-tight leading-snug">
+                                <h2 className="text-base font-bold text-white tracking-tight leading-snug">
                                     {!isRegister ? activeBranding.name : 'Registrasi Sekolah Baru'}
                                 </h2>
-                                <p className="text-[11px] text-slate-400 mt-0.5">
+                                <p className="text-[10px] text-slate-400">
                                     {!isRegister ? 'Masuk ke portal akun sekolah Anda' : 'Lengkapi data untuk mengajukan pendaftaran sekolah'}
                                 </p>
                             </div>
@@ -568,7 +636,7 @@ export default function LoginPage() {
 
                         {!isRegister ? (
                             /* LOGIN FORM */
-                            <form onSubmit={handleLoginSubmit} className="space-y-3">
+                            <form onSubmit={handleLoginSubmit} className="space-y-2.5">
                                 
                                 {/* School Code Input */}
                                 <div>
@@ -577,7 +645,7 @@ export default function LoginPage() {
                                     </label>
                                     <div className="relative">
                                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                            <SchoolIcon className="h-4 w-4" />
+                                            <SchoolIcon className="h-4 w-4 text-cyan-400" />
                                         </span>
                                         <input
                                             type="text"
@@ -601,7 +669,7 @@ export default function LoginPage() {
                                     </label>
                                     <div className="relative">
                                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                            <UserCheck className="h-4 w-4" />
+                                            <UserCheck className="h-4 w-4 text-emerald-400" />
                                         </span>
                                         <input
                                             type="text"
@@ -625,7 +693,7 @@ export default function LoginPage() {
                                     </label>
                                     <div className="relative">
                                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                            <Lock className="h-4 w-4" />
+                                            <Lock className="h-4 w-4 text-amber-400" />
                                         </span>
                                         <input
                                             type={showPassword ? "text" : "password"}
@@ -669,11 +737,11 @@ export default function LoginPage() {
                                 </button>
 
                                 {/* Quick Fill Demo Accounts Showcase */}
-                                <div className="pt-2.5 border-t border-slate-800/80 space-y-1.5">
+                                <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
                                     <div className="flex items-center justify-between text-[10px]">
-                                        <span className="font-bold text-slate-400 flex items-center gap-1">
+                                        <span className="font-bold text-slate-300 flex items-center gap-1">
                                             <Sparkles className="h-3 w-3 text-amber-400" />
-                                            Coba Demo Akses Cepat:
+                                            Akses Cepat Demo Peran:
                                         </span>
                                     </div>
 
@@ -681,7 +749,7 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleQuickFillDemo('SMP20', 'admin', 'admin123')}
-                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-[10px] border border-slate-800 transition-colors text-left truncate"
+                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 font-bold text-[10px] border border-cyan-500/30 transition-all text-left truncate"
                                             title="Admin SMP20"
                                         >
                                             🛡️ Admin
@@ -689,7 +757,7 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleQuickFillDemo('SMP20', 'guru_bk', 'bk123')}
-                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-[10px] border border-slate-800 transition-colors text-left truncate"
+                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-[10px] border border-amber-500/30 transition-all text-left truncate"
                                             title="Guru BK"
                                         >
                                             🧠 Guru BK
@@ -697,7 +765,7 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleQuickFillDemo('SMP20', 'walas', 'walas123')}
-                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-[10px] border border-slate-800 transition-colors text-left truncate"
+                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-emerald-300 font-bold text-[10px] border border-emerald-500/30 transition-all text-left truncate"
                                             title="Wali Kelas"
                                         >
                                             👨‍🏫 Walas
@@ -705,7 +773,7 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleQuickFillDemo('SMP20', 'guru', 'guru123')}
-                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-[10px] border border-slate-800 transition-colors text-left truncate"
+                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-indigo-300 font-bold text-[10px] border border-indigo-500/30 transition-all text-left truncate"
                                             title="Guru Mapel"
                                         >
                                             📖 Mapel
@@ -713,7 +781,7 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleQuickFillDemo('SMP20', 'piket', 'piket123')}
-                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-[10px] border border-slate-800 transition-colors text-left truncate"
+                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-rose-300 font-bold text-[10px] border border-rose-500/30 transition-all text-left truncate"
                                             title="Guru Piket"
                                         >
                                             📋 Piket
@@ -721,7 +789,7 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleQuickFillDemo('', 'superadmin', 'superadmin123')}
-                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-[10px] border border-amber-500/30 transition-colors text-left truncate"
+                                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 font-black text-[10px] border border-amber-500/40 transition-all text-left truncate"
                                             title="Super Admin"
                                         >
                                             👑 Super
@@ -729,8 +797,14 @@ export default function LoginPage() {
                                     </div>
                                 </div>
 
+                                {/* Security Trust Badge Footer */}
+                                <div className="pt-2 text-center text-[9px] text-slate-400 flex items-center justify-center gap-1">
+                                    <ShieldCheck className="h-3 w-3 text-emerald-400 shrink-0" />
+                                    <span>Enkripsi SSL 256-Bit &bull; Data Terisolasi Aman</span>
+                                </div>
+
                                 {/* Register toggle link */}
-                                <div className="text-center pt-1 text-[11px]">
+                                <div className="text-center pt-0.5 text-[11px]">
                                     <span className="text-slate-400">Sekolah Anda belum terdaftar? </span>
                                     <button
                                         type="button"
@@ -748,7 +822,7 @@ export default function LoginPage() {
                             </form>
                         ) : (
                             /* REGISTER FORM */
-                            <form onSubmit={handleRegisterSubmit} className="space-y-2.5">
+                            <form onSubmit={handleRegisterSubmit} className="space-y-2">
                                 <div>
                                     <label className="block text-[11px] font-semibold text-slate-300 mb-0.5">Nama Lengkap Sekolah</label>
                                     <input
@@ -760,6 +834,7 @@ export default function LoginPage() {
                                         }`}
                                         placeholder="Misal: SMP Negeri 2 Depok"
                                     />
+                                    {errors.regName && <p className="text-[10px] text-rose-400 mt-0.5">{errors.regName}</p>}
                                 </div>
 
                                 <div>
@@ -773,6 +848,7 @@ export default function LoginPage() {
                                         }`}
                                         placeholder="Misal: SMP2"
                                     />
+                                    {errors.regCode && <p className="text-[10px] text-rose-400 mt-0.5">{errors.regCode}</p>}
                                 </div>
 
                                 <div>
@@ -786,6 +862,7 @@ export default function LoginPage() {
                                         }`}
                                         placeholder="Misal: 20123456"
                                     />
+                                    {errors.regNpsn && <p className="text-[10px] text-rose-400 mt-0.5">{errors.regNpsn}</p>}
                                 </div>
 
                                 <div>
@@ -799,32 +876,43 @@ export default function LoginPage() {
                                         }`}
                                         placeholder="Misal: 081234567890"
                                     />
+                                    {errors.regContact && <p className="text-[10px] text-rose-400 mt-0.5">{errors.regContact}</p>}
                                 </div>
 
                                 <div>
                                     <label className="block text-[11px] font-semibold text-slate-300 mb-0.5">Logo Sekolah (Opsional)</label>
                                     <div className="flex items-center gap-2">
-                                        <label className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 py-1 px-2.5 text-[11px] font-medium text-slate-300 cursor-pointer shadow-sm">
-                                            <Upload className="h-3 w-3 text-slate-400" />
-                                            <span>Pilih Logo</span>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleLogoChange}
-                                                className="hidden"
-                                            />
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleLogoChange}
+                                            className="hidden"
+                                            id="reg-logo-upload"
+                                        />
+                                        <label
+                                            htmlFor="reg-logo-upload"
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-dashed border-slate-700 bg-slate-900 hover:bg-slate-800 text-xs text-slate-300 cursor-pointer"
+                                        >
+                                            <Upload className="h-3.5 w-3.5 text-cyan-400" />
+                                            <span>{regLogo ? 'Logo Terpilih' : 'Unggah Logo PNG/JPG'}</span>
                                         </label>
-                                        {regLogo ? (
-                                            <div className="h-7 w-7 rounded-lg border border-slate-700 bg-slate-800 p-0.5 flex items-center justify-center">
-                                                <img src={regLogo} alt="Preview" className="max-h-full max-w-full object-contain" />
+                                        {regLogo && (
+                                            <div className="h-8 w-8 rounded-lg bg-white p-1 overflow-hidden shrink-0">
+                                                <img src={regLogo} alt="Preview" className="w-full h-full object-contain" />
                                             </div>
-                                        ) : (
-                                            <span className="text-[10px] text-slate-500">Belum ada logo</span>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 pt-2">
+                                <button
+                                    type="submit"
+                                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition-all shadow-md mt-1 cursor-pointer"
+                                >
+                                    Kirim Pendaftaran Sekolah
+                                </button>
+
+                                <div className="text-center pt-1 text-[11px]">
+                                    <span className="text-slate-400">Sudah memiliki akun? </span>
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -833,21 +921,16 @@ export default function LoginPage() {
                                             setGeneralError('');
                                             setGeneralSuccess('');
                                         }}
-                                        className="flex-1 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-2 transition-all"
+                                        className="text-cyan-400 font-bold hover:underline"
                                     >
-                                        Batal
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="flex-1 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs py-2 transition-all shadow-md"
-                                    >
-                                        Kirim Pendaftaran
+                                        Kembali ke Login
                                     </button>
                                 </div>
                             </form>
                         )}
                     </div>
                 </div>
+
             </div>
         </div>
     );
