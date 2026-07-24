@@ -240,8 +240,27 @@ export default function RaporView() {
             kedisiplinanBadge = 'bg-blue-100 text-blue-800';
         }
 
+        const getReligionFromSubject = (subject: string): string | null => {
+            if (!subject) return null;
+            const lower = subject.toLowerCase();
+            if (lower.includes('islam')) return 'Islam';
+            if (lower.includes('kristen') || lower.includes('protestan')) return 'Kristen';
+            if (lower.includes('katolik')) return 'Katolik';
+            if (lower.includes('hindu')) return 'Hindu';
+            if (lower.includes('buddha')) return 'Buddha';
+            if (lower.includes('khonghucu')) return 'Khonghucu';
+            return null;
+        };
+
+        const studentAgama = student.agama || 'Islam';
+        const filteredSubjects = allSubjects.filter(subject => {
+            const subjRel = getReligionFromSubject(subject);
+            if (!subjRel) return true;
+            return subjRel.toLowerCase() === studentAgama.toLowerCase();
+        });
+
         // Subject Grades & TP
-        const subjectReportData = allSubjects.map(subject => {
+        const subjectReportData = filteredSubjects.map(subject => {
             const entries = (currentSchool.nilaiMapel || []).filter(
                 n => n.classId === selectedClassId && n.subject === subject
             );

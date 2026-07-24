@@ -52,6 +52,7 @@ export default function AdminView() {
     const [newStudentClassId, setNewStudentClassId] = useState('');
     const [newStudentName, setNewStudentName] = useState('');
     const [newStudentJk, setNewStudentJk] = useState<'L' | 'P'>('L');
+    const [newStudentAgama, setNewStudentAgama] = useState<string>('Islam');
     const [newStudentNis, setNewStudentNis] = useState('');
     const [newStudentNisn, setNewStudentNisn] = useState('');
     const [newStudentPhone, setNewStudentPhone] = useState('');
@@ -89,9 +90,10 @@ export default function AdminView() {
                         const nisn = String(row[3] || '').trim();
                         const phone = String(row[4] || '').trim();
                         const email = String(row[5] || '').trim();
+                        const agama = String(row[6] || 'Islam').trim();
 
                         if (name) {
-                            rows.push(`${name}\t${jk}\t${nis}\t${nisn}\t${phone}\t${email}`);
+                            rows.push(`${name}\t${jk}\t${nis}\t${nisn}\t${phone}\t${email}\t${agama}`);
                         }
                     }
                 });
@@ -113,10 +115,10 @@ export default function AdminView() {
 
     const handleDownloadTemplate = () => {
         const sampleData = [
-            ['Nama Siswa', 'JK (L/P)', 'NIS', 'NISN', 'No HP Ortua (WA)', 'Email Ortua'],
-            ['Ahmad Fauzi', 'L', '2026001', '0081234567', '081234567890', 'fauzi.parent@gmail.com'],
-            ['Siti Nurhaliza', 'P', '2026002', '0081234568', '081298765432', 'siti.parent@gmail.com'],
-            ['Budi Santoso', 'L', '2026003', '0081234569', '085712345678', 'budi.parent@gmail.com']
+            ['Nama Siswa', 'JK (L/P)', 'NIS', 'NISN', 'No HP Ortua (WA)', 'Email Ortua', 'Agama'],
+            ['Ahmad Fauzi', 'L', '2026001', '0081234567', '081234567890', 'fauzi.parent@gmail.com', 'Islam'],
+            ['Siti Nurhaliza', 'P', '2026002', '0081234568', '081298765432', 'siti.parent@gmail.com', 'Islam'],
+            ['Daniel Christian', 'L', '2026003', '0081234569', '085712345678', 'daniel.parent@gmail.com', 'Kristen']
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(sampleData);
@@ -264,6 +266,7 @@ export default function AdminView() {
             const nisn = cols[3] ? cols[3].trim() : '-';
             const phone = cols[4] ? cols[4].trim() : '';
             const email = cols[5] ? cols[5].trim() : '';
+            const agama = cols[6] ? cols[6].trim() : 'Islam';
 
             let rowError = '';
             if (!name) rowError += 'Nama Kosong. ';
@@ -283,6 +286,7 @@ export default function AdminView() {
                 nisn,
                 phone,
                 email,
+                agama,
                 error: rowError
             });
         });
@@ -397,7 +401,8 @@ export default function AdminView() {
             nis: newStudentNis.trim() || '-',
             nisn: newStudentNisn.trim() || '-',
             parentPhone: phone,
-            parentEmail: email
+            parentEmail: email,
+            agama: newStudentAgama
         };
 
         updateSchoolProperty({
@@ -466,7 +471,8 @@ export default function AdminView() {
                 nis: row.nis,
                 nisn: row.nisn,
                 parentPhone: row.phone,
-                parentEmail: row.email
+                parentEmail: row.email,
+                agama: row.agama || 'Islam'
             });
         });
 
@@ -1105,6 +1111,23 @@ export default function AdminView() {
                                 </div>
                             </div>
 
+                            <div>
+                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Agama Siswa</label>
+                                <select
+                                    value={newStudentAgama}
+                                    onChange={(e) => setNewStudentAgama(e.target.value)}
+                                    className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500 focus:bg-white"
+                                >
+                                    <option value="Islam">Islam</option>
+                                    <option value="Kristen">Kristen</option>
+                                    <option value="Katolik">Katolik</option>
+                                    <option value="Hindu">Hindu</option>
+                                    <option value="Buddha">Buddha</option>
+                                    <option value="Khonghucu">Khonghucu</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-500 mb-1">NIS</label>
@@ -1169,7 +1192,7 @@ export default function AdminView() {
                                 <Upload className="h-4.5 w-4.5 text-cyan-600" />
                                 <span>Impor Data Siswa Massal (.xlsx / CSV)</span>
                             </h4>
-                            <p className="text-[10px] text-slate-400 mt-0.5">Unggah file Excel `.xlsx` atau tempel teks: <code>Nama, JK (L/P), NIS, NISN, No. HP, Email</code></p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Unggah file Excel `.xlsx` atau tempel teks: <code>Nama, JK (L/P), NIS, NISN, No. HP, Email, Agama</code></p>
                         </div>
                         <div className="flex items-center gap-2">
                             <label className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 text-cyan-700 font-bold text-xs px-3 py-1.5 transition-all cursor-pointer shadow-sm active:scale-[0.98]">
@@ -1341,7 +1364,8 @@ export default function AdminView() {
                                             <tr className="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase bg-slate-50">
                                                 <th className="py-2.5 px-4 w-12 text-center">No</th>
                                                 <th className="py-2.5 px-4">Nama Siswa</th>
-                                                <th className="py-2.5 px-4 text-center w-20">JK</th>
+                                                <th className="py-2.5 px-4 text-center w-24">Agama</th>
+                                                <th className="py-2.5 px-4 text-center w-16">JK</th>
                                                 <th className="py-2.5 px-4">NIS / NISN</th>
                                                 <th className="py-2.5 px-4">Kontak Orang Tua</th>
                                                 <th className="py-2.5 px-4 text-center w-28">Aksi</th>
@@ -1352,6 +1376,11 @@ export default function AdminView() {
                                                 <tr key={stud.id} className="hover:bg-slate-50/50 transition-colors">
                                                     <td className="py-3 px-4 text-center text-slate-400 font-semibold">{idx + 1}</td>
                                                     <td className="py-3 px-4 font-bold text-slate-800">{stud.name}</td>
+                                                    <td className="py-3 px-4 text-center">
+                                                        <span className="inline-block px-2 py-0.5 rounded bg-slate-100 font-bold text-slate-700 text-[10px]">
+                                                            {stud.agama || 'Islam'}
+                                                        </span>
+                                                    </td>
                                                     <td className="py-3 px-4 text-center font-bold text-slate-500">{stud.jk}</td>
                                                     <td className="py-3 px-4 text-slate-500 font-medium">{stud.nis} / {stud.nisn}</td>
                                                     <td className="py-3 px-4">
@@ -1381,7 +1410,7 @@ export default function AdminView() {
                                             ))}
                                             {classStudents.length === 0 && (
                                                 <tr>
-                                                    <td colSpan={6} className="text-center text-slate-400 py-6">
+                                                    <td colSpan={7} className="text-center text-slate-400 py-6">
                                                         Belum ada siswa terdaftar di kelas ini.
                                                     </td>
                                                 </tr>
@@ -1409,7 +1438,8 @@ export default function AdminView() {
                                         <tr className="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase bg-slate-50">
                                             <th className="py-2.5 px-4 w-12 text-center">No</th>
                                             <th className="py-2.5 px-4">Nama Siswa</th>
-                                            <th className="py-2.5 px-4 text-center w-20">JK</th>
+                                            <th className="py-2.5 px-4 text-center w-24">Agama</th>
+                                            <th className="py-2.5 px-4 text-center w-16">JK</th>
                                             <th className="py-2.5 px-4">NIS / NISN</th>
                                             <th className="py-2.5 px-4">Kontak Orang Tua</th>
                                             <th className="py-2.5 px-4 text-center w-28">Aksi</th>
@@ -1420,6 +1450,11 @@ export default function AdminView() {
                                             <tr key={stud.id} className="hover:bg-slate-50/50 transition-colors">
                                                 <td className="py-3 px-4 text-center text-slate-400 font-semibold">{idx + 1}</td>
                                                 <td className="py-3 px-4 font-bold text-slate-800">{stud.name}</td>
+                                                <td className="py-3 px-4 text-center">
+                                                    <span className="inline-block px-2 py-0.5 rounded bg-slate-100 font-bold text-slate-700 text-[10px]">
+                                                        {stud.agama || 'Islam'}
+                                                    </span>
+                                                </td>
                                                 <td className="py-3 px-4 text-center font-bold text-slate-500">{stud.jk}</td>
                                                 <td className="py-3 px-4 text-slate-500 font-medium">{stud.nis} / {stud.nisn}</td>
                                                 <td className="py-3 px-4">
@@ -1524,6 +1559,23 @@ export default function AdminView() {
                                         {currentSchool.classes.map(c => (
                                             <option key={c.id} value={c.id}>Kelas {c.name}</option>
                                         ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Agama Siswa</label>
+                                    <select
+                                        value={editStudentModal.agama || 'Islam'}
+                                        onChange={(e) => setEditStudentModal({ ...editStudentModal, agama: e.target.value as any })}
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500 focus:bg-white"
+                                    >
+                                        <option value="Islam">Islam</option>
+                                        <option value="Kristen">Kristen</option>
+                                        <option value="Katolik">Katolik</option>
+                                        <option value="Hindu">Hindu</option>
+                                        <option value="Buddha">Buddha</option>
+                                        <option value="Khonghucu">Khonghucu</option>
+                                        <option value="Lainnya">Lainnya</option>
                                     </select>
                                 </div>
 

@@ -74,7 +74,23 @@ export default function MapelNilaiView() {
 
     if (!currentSchool || !currentUser || !appData) return null;
 
-    const students = currentSchool.students.filter(s => s.classId === selectedClassId);
+    const getReligionFromSubject = (subject: string): string | null => {
+        if (!subject) return null;
+        const lower = subject.toLowerCase();
+        if (lower.includes('islam')) return 'Islam';
+        if (lower.includes('kristen') || lower.includes('protestan')) return 'Kristen';
+        if (lower.includes('katolik')) return 'Katolik';
+        if (lower.includes('hindu')) return 'Hindu';
+        if (lower.includes('buddha')) return 'Buddha';
+        if (lower.includes('khonghucu')) return 'Khonghucu';
+        return null;
+    };
+
+    const targetReligion = getReligionFromSubject(mapelName);
+    let students = currentSchool.students.filter(s => s.classId === selectedClassId);
+    if (targetReligion) {
+        students = students.filter(s => (s.agama || 'Islam').toLowerCase() === targetReligion.toLowerCase());
+    }
     students.sort((a, b) => a.name.localeCompare(b.name));
 
     // Get TPs for this class & mapel

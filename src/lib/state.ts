@@ -27,10 +27,10 @@ export const defaultData: AppData = {
                 { id: 'vt5', name: 'Tidak Masuk Tanpa Keterangan (Alfa)', points: 5 }
             ],
             students: [
-                { id: 'u1', classId: 'c1', name: 'Aulia Putri', jk: 'P', nis: '24001', nisn: '0081234561', parentPhone: '6281234567890', parentEmail: 'parent.aulia@example.com' },
-                { id: 'u2', classId: 'c1', name: 'Raka Pratama', jk: 'L', nis: '24002', nisn: '0081234562', parentPhone: '6281234567891', parentEmail: '' },
-                { id: 'u3', classId: 'c2', name: 'Satria Ananda', jk: 'L', nis: '24003', nisn: '0081234563', parentPhone: '', parentEmail: '' },
-                { id: 'u4', classId: 'c3', name: 'Intan Sari', jk: 'P', nis: '23001', nisn: '0071234564', parentPhone: '6281234567893', parentEmail: 'parent.intan@example.com' }
+                { id: 'u1', classId: 'c1', name: 'Aulia Putri', jk: 'P', nis: '24001', nisn: '0081234561', parentPhone: '6281234567890', parentEmail: 'parent.aulia@example.com', agama: 'Islam' },
+                { id: 'u2', classId: 'c1', name: 'Raka Pratama', jk: 'L', nis: '24002', nisn: '0081234562', parentPhone: '6281234567891', parentEmail: '', agama: 'Islam' },
+                { id: 'u3', classId: 'c2', name: 'Satria Ananda', jk: 'L', nis: '24003', nisn: '0081234563', parentPhone: '', parentEmail: '', agama: 'Kristen' },
+                { id: 'u4', classId: 'c3', name: 'Intan Sari', jk: 'P', nis: '23001', nisn: '0071234564', parentPhone: '6281234567893', parentEmail: 'parent.intan@example.com', agama: 'Katolik' }
             ],
             absensi: {
                 '2026-07-01': { 'u1': 'H', 'u2': 'H' },

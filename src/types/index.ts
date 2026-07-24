@@ -18,6 +18,7 @@ export interface Student {
     nisn: string;
     parentPhone?: string;
     parentEmail?: string;
+    agama?: 'Islam' | 'Kristen' | 'Katolik' | 'Hindu' | 'Buddha' | 'Khonghucu' | 'Lainnya' | string;
 }
 
 export interface User {
