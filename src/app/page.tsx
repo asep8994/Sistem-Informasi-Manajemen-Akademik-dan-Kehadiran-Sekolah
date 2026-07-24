@@ -14,6 +14,8 @@ import MapelAbsensiView from '../components/MapelAbsensiView';
 import MapelAgendaView from '../components/MapelAgendaView';
 import MapelNilaiView from '../components/MapelNilaiView';
 import NotifikasiOrtuaView from '../components/NotifikasiOrtuaView';
+import RaporView from '../components/RaporView';
+import LeggerView from '../components/LeggerView';
 import { Loader2 } from 'lucide-react';
 
 export default function HomePage() {
@@ -39,6 +41,10 @@ export default function HomePage() {
                 return <PelanggaranView />;
             case 'laporan':
                 return <LaporanView />;
+            case 'rapor':
+                return <RaporView />;
+            case 'legger':
+                return <LeggerView />;
             case 'notifikasi-ortua':
                 return <NotifikasiOrtuaView />;
             case 'admin-siswa':

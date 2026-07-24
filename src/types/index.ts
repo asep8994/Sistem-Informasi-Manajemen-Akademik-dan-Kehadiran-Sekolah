@@ -26,6 +26,7 @@ export interface User {
     password?: string;
     role: 'admin' | 'walas' | 'guru_bk' | 'guru_piket' | 'guru_mapel' | 'superadmin';
     name: string;
+    nip?: string; // NIP for Walas / Teachers
     classId?: string; // for walas / guru_mapel
     classes?: string[]; // for guru_mapel assigned classes
     mapelName?: string; // for guru_mapel subject name
@@ -75,6 +76,32 @@ export interface GradeEntry {
     };
 }
 
+export interface TujuanPembelajaran {
+    id: string;
+    classId: string;
+    subject: string;
+    code: string; // e.g. "TP 1"
+    description: string; // e.g. "Memahami persamaan kuadrat"
+}
+
+export interface RaporConfig {
+    kepalaSekolahName: string;
+    kepalaSekolahNip?: string;
+    kepalaSekolahTte?: string; // base64 image or url
+    tanggalRapor: string; // e.g. "24 Juli 2026"
+    mapelList?: string[];
+    paperSize?: 'A4' | 'F4' | 'Letter';
+    paperMargin?: 'normal' | 'compact' | 'wide';
+    kopJudul?: string; // e.g. "LAPORAN HASIL BELAJAR TENGAH SEMESTER (PTS / STS)"
+    kopSubJudul?: string; // e.g. "DINAS PENDIDIKAN KOTA DEPOK"
+    kopLine1?: string; // Baris 1 (Bold)
+    kopLine2?: string; // Baris 2 (Bold)
+    kopLine3?: string; // Baris 3 (Bold)
+    kopLine4?: string; // Baris 4 (Regular)
+    kopLine5?: string; // Baris 5 (Regular)
+    raporLogo?: string; // Custom Logo for Rapor KOP (base64 image or url)
+}
+
 export interface School {
     id: string;
     code: string;
@@ -119,6 +146,17 @@ export interface School {
             [subject: string]: string[]; // array of assessment names
         };
     };
+    tujuanPembelajaran?: TujuanPembelajaran[];
+    ketuntasanTP?: {
+        [classId: string]: {
+            [subject: string]: {
+                [studentId: string]: {
+                    [tpId: string]: 'tuntas' | 'perlu_bimbingan';
+                };
+            };
+        };
+    };
+    raporConfig?: RaporConfig;
     users: User[];
     notificationConfig: NotificationConfig;
     notificationLogs: NotificationLog[];

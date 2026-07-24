@@ -32,16 +32,51 @@ export const defaultData: AppData = {
                 { id: 'u3', classId: 'c2', name: 'Satria Ananda', jk: 'L', nis: '24003', nisn: '0081234563', parentPhone: '', parentEmail: '' },
                 { id: 'u4', classId: 'c3', name: 'Intan Sari', jk: 'P', nis: '23001', nisn: '0071234564', parentPhone: '6281234567893', parentEmail: 'parent.intan@example.com' }
             ],
-            absensi: {},
-            violations: [],
+            absensi: {
+                '2026-07-01': { 'u1': 'H', 'u2': 'H' },
+                '2026-07-02': { 'u1': 'H', 'u2': 'S' },
+                '2026-07-03': { 'u1': 'I', 'u2': 'H' },
+                '2026-07-04': { 'u1': 'H', 'u2': 'A' }
+            },
+            violations: [
+                { id: 'v1', studentId: 'u2', studentName: 'Raka Pratama', classId: 'c1', className: '7-A', type: 'Terlambat Masuk Sekolah', points: 5, date: '02/07/2026, 07.15.00', reporter: 'Piket' }
+            ],
             absensiMapel: {},
             agendaMapel: [],
-            nilaiMapel: [],
+            nilaiMapel: [
+                { id: 'g1', classId: 'c1', subject: 'Matematika', assessmentType: 'Tugas 1', grades: { 'u1': 85, 'u2': 75 } },
+                { id: 'g2', classId: 'c1', subject: 'Matematika', assessmentType: 'UTS', grades: { 'u1': 90, 'u2': 70 } },
+                { id: 'g3', classId: 'c1', subject: 'Bahasa Indonesia', assessmentType: 'Tugas 1', grades: { 'u1': 88, 'u2': 80 } },
+                { id: 'g4', classId: 'c1', subject: 'Bahasa Indonesia', assessmentType: 'UTS', grades: { 'u1': 92, 'u2': 78 } },
+                { id: 'g5', classId: 'c1', subject: 'IPA', assessmentType: 'UTS', grades: { 'u1': 86, 'u2': 72 } }
+            ],
             nilaiMapelConfig: {},
+            tujuanPembelajaran: [
+                { id: 'tp1', classId: 'c1', subject: 'Matematika', code: 'TP 1', description: 'Memahami Aljabar dan Operasi Hitung Dasar' },
+                { id: 'tp2', classId: 'c1', subject: 'Matematika', code: 'TP 2', description: 'Menyelesaikan Persamaan Linear Satu Variabel' },
+                { id: 'tp3', classId: 'c1', subject: 'Bahasa Indonesia', code: 'TP 1', description: 'Menganalisis Ide Pokok dan Gagasan Dalam Teks Laporan' },
+                { id: 'tp4', classId: 'c1', subject: 'IPA', code: 'TP 1', description: 'Memahami Pengukuran dan Klasifikasi Makhluk Hidup' }
+            ],
+            ketuntasanTP: {
+                'c1': {
+                    'Matematika': {
+                        'u1': { 'tp1': 'tuntas', 'tp2': 'tuntas' },
+                        'u2': { 'tp1': 'tuntas', 'tp2': 'perlu_bimbingan' }
+                    },
+                    'Bahasa Indonesia': {
+                        'u1': { 'tp3': 'tuntas' },
+                        'u2': { 'tp3': 'tuntas' }
+                    },
+                    'IPA': {
+                        'u1': { 'tp4': 'tuntas' },
+                        'u2': { 'tp4': 'perlu_bimbingan' }
+                    }
+                }
+            },
             users: [
                 { id: 'usr-admin-s1', username: 'admin', password: 'admin123', role: 'admin', name: 'Admin SMP N 20 Depok' },
                 { id: 'usr-guru-s1', username: 'guru', password: 'guru123', role: 'guru_mapel', name: 'Guru SMP N 20 Depok', mapelName: 'Matematika', classes: ['c1', 'c2'] },
-                { id: 'usr-walas-s1', username: 'walas', password: 'walas123', role: 'walas', classId: 'c1', name: 'Wali Kelas 7-A (SMP 20)' },
+                { id: 'usr-walas-s1', username: 'walas', password: 'walas123', role: 'walas', classId: 'c1', name: 'Dra. Endang Rahmawati', nip: '19820514 200801 2 015' },
                 { id: 'usr-bk-s1', username: 'guru_bk', password: 'bk123', role: 'guru_bk', name: 'Guru BK SMP N 20 Depok' },
                 { id: 'usr-piket-s1', username: 'piket', password: 'piket123', role: 'guru_piket', name: 'Guru Piket SMP N 20 Depok' }
             ],

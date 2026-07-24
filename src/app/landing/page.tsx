@@ -188,7 +188,7 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-white relative overflow-x-hidden">
-            
+
             {/* Background Tech Grid Pattern */}
             <div
                 className="fixed inset-0 bg-cover bg-center pointer-events-none opacity-40 z-0"
@@ -203,7 +203,7 @@ export default function LandingPage() {
             {/* Sticky Glassmorphism Header / Navbar */}
             <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 transition-all">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    
+
                     {/* Logo Branding */}
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                         <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md p-1.5 border border-white/20 shadow-lg flex items-center justify-center">
@@ -259,10 +259,10 @@ export default function LandingPage() {
             >
                 {/* Split Hero 2-Column Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                    
+
                     {/* LEFT COLUMN: HEADLINE, SUBHEADLINE & CTAS */}
                     <div className="lg:col-span-7 space-y-6 text-left">
-                        
+
                         {/* Hero Badge */}
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/90 border border-cyan-500/50 text-cyan-300 text-xs font-extrabold shadow-lg shadow-cyan-500/20 backdrop-blur-md">
                             <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
@@ -320,7 +320,7 @@ export default function LandingPage() {
 
                     {/* RIGHT COLUMN: INTERACTIVE 3D ANIMATED ASSETS SHOWCASE */}
                     <div className="lg:col-span-5 relative flex justify-center items-center py-6">
-                        
+
                         {/* Ambient Pulsing Glow Halo */}
                         <div className="absolute h-72 w-72 rounded-full bg-gradient-to-tr from-cyan-500/30 to-blue-600/30 blur-3xl animate-pulse-glow pointer-events-none" />
 
@@ -373,18 +373,17 @@ export default function LandingPage() {
 
                 {/* Hero Interactive Showcase Slider */}
                 <div className="mt-14 max-w-5xl mx-auto">
-                    
+
                     {/* Tab Selection */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                         {heroSlides.map((slide, idx) => (
                             <button
                                 key={slide.id}
                                 onClick={() => setActiveHeroTab(idx)}
-                                className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2 ${
-                                    activeHeroTab === idx
+                                className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2 ${activeHeroTab === idx
                                         ? 'bg-slate-800/90 border-cyan-500 text-cyan-300 shadow-md shadow-cyan-500/10'
                                         : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200'
-                                }`}
+                                    }`}
                             >
                                 <span className={`h-2 w-2 rounded-full ${activeHeroTab === idx ? 'bg-cyan-400 animate-ping' : 'bg-slate-600'}`} />
                                 <span className="truncate">{slide.badge}</span>
@@ -394,7 +393,7 @@ export default function LandingPage() {
 
                     {/* Preview Frame */}
                     <div className="relative rounded-2xl bg-slate-900/90 p-2 sm:p-3 border border-cyan-500/40 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden group">
-                        
+
                         {/* Device Frame Top Bar */}
                         <div className="flex items-center justify-between px-3 py-2 bg-slate-950/90 border-b border-slate-800 rounded-t-xl text-xs text-slate-400 font-mono">
                             <div className="flex items-center gap-2">
@@ -420,7 +419,7 @@ export default function LandingPage() {
                                 alt={heroSlides[activeHeroTab].title}
                                 className="w-full h-full object-cover object-top transform transition-all duration-700 group-hover:scale-102"
                             />
-                            
+
                             {/* Floating 3D Animated Badge Overlay inside Showcase */}
                             <div className="absolute top-4 right-4 z-20 hidden sm:block animate-float-3d">
                                 <img
@@ -450,7 +449,7 @@ export default function LandingPage() {
             {/* KEY METRICS & COUNTER SECTION */}
             <section className="relative z-10 py-10 bg-slate-900/60 border-y border-slate-800/80 backdrop-blur-md">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-                    
+
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/40 hover:-translate-y-1 transition-all duration-300">
                         <div className="text-2xl sm:text-4xl font-black text-cyan-400 tracking-tight">150+</div>
                         <div className="text-xs font-semibold text-slate-300 mt-1">Sekolah Terdaftar</div>
@@ -480,7 +479,7 @@ export default function LandingPage() {
 
             {/* BENTO GRID FEATURE HIGHLIGHTS WITH ANIMATED 3D ASSETS */}
             <section id="fitur" className="relative z-10 py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
+
                 <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
                     <span className="text-xs font-extrabold uppercase tracking-widest text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">
                         Fitur Utama &amp; Unggulan
@@ -495,7 +494,7 @@ export default function LandingPage() {
 
                 {/* Bento Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                    
+
                     {/* Box 1: Large Span (WA Notif with Animated 3D Asset) */}
                     <div className="md:col-span-2 rounded-3xl bg-slate-900/80 p-6 border border-emerald-500/30 shadow-lg hover:border-emerald-500/60 hover:-translate-y-1.5 transition-all duration-500 group flex flex-col justify-between relative overflow-hidden">
                         <div className="flex items-start justify-between">
@@ -582,11 +581,18 @@ export default function LandingPage() {
                         </div>
                     </div>
 
-                    {/* Box 4: Export Reports */}
-                    <div className="md:col-span-1 rounded-3xl bg-slate-900/80 p-6 border border-teal-500/30 shadow-lg hover:border-teal-500/60 hover:-translate-y-1.5 transition-all duration-500 group flex flex-col justify-between">
+                    {/* Box 4: Export Reports (with Animated 3D Excel Icon) */}
+                    <div className="md:col-span-1 rounded-3xl bg-slate-900/80 p-6 border border-teal-500/30 shadow-lg hover:border-teal-500/60 hover:-translate-y-1.5 transition-all duration-500 group flex flex-col justify-between relative overflow-hidden">
                         <div className="space-y-3">
-                            <div className="h-10 w-10 rounded-2xl bg-teal-500/20 text-teal-400 border border-teal-500/30 flex items-center justify-center">
-                                <FileSpreadsheet className="h-5 w-5" />
+                            <div className="flex items-center justify-between">
+                                <div className="h-10 w-10 rounded-2xl bg-teal-500/20 text-teal-400 border border-teal-500/30 flex items-center justify-center">
+                                    <FileSpreadsheet className="h-5 w-5" />
+                                </div>
+                                <img
+                                    src="/excel_3d_icon.png"
+                                    alt="3D Excel Icon"
+                                    className="h-12 w-12 object-contain animate-float-reverse filter drop-shadow-[0_8px_15px_rgba(20,184,166,0.4)]"
+                                />
                             </div>
                             <h3 className="text-lg font-bold text-white group-hover:text-teal-300 transition-colors">
                                 Ekspor Excel 1-Klik
@@ -601,21 +607,30 @@ export default function LandingPage() {
                         </div>
                     </div>
 
-                    {/* Box 5: Multi-Role Access */}
-                    <div className="md:col-span-2 rounded-3xl bg-slate-900/80 p-6 border border-purple-500/30 shadow-lg hover:border-purple-500/60 hover:-translate-y-1.5 transition-all duration-500 group flex flex-col justify-between">
-                        <div className="space-y-3">
-                            <div className="h-10 w-10 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center">
-                                <Users className="h-5 w-5" />
+                    {/* Box 5: Multi-Role Access (with Animated 3D Roles Badge) */}
+                    <div className="md:col-span-2 rounded-3xl bg-slate-900/80 p-6 border border-purple-500/30 shadow-lg hover:border-purple-500/60 hover:-translate-y-1.5 transition-all duration-500 group flex flex-col justify-between relative overflow-hidden">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-3 max-w-md">
+                                <div className="h-10 w-10 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center">
+                                    <Users className="h-5 w-5" />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                                    Hak Akses Berjenjang
+                                </span>
+                                <h3 className="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">
+                                    Hak Akses Terpisah Menurut Peran Tugas (RBAC)
+                                </h3>
+                                <p className="text-xs text-slate-300 leading-relaxed">
+                                    Hak akses disesuaikan untuk Admin Sekolah, Wali Kelas, Guru BK, Guru Mapel, Guru Piket, hingga Super Admin. Setiap peran memiliki tampilan yang disederhanakan sesuai tugasnya.
+                                </p>
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30">
-                                Hak Akses Berjenjang
-                            </span>
-                            <h3 className="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">
-                                Hak Akses Terpisah Menurut Peran Tugas (RBAC)
-                            </h3>
-                            <p className="text-xs text-slate-300 leading-relaxed">
-                                Hak akses disesuaikan untuk Admin Sekolah, Wali Kelas, Guru BK, Guru Mapel, Guru Piket, hingga Super Admin. Setiap peran memiliki tampilan yang disederhanakan sesuai tugasnya.
-                            </p>
+
+                            {/* Animated 3D Floating Icon Roles/RBAC */}
+                            <img
+                                src="/roles_3d_icon.png"
+                                alt="3D Roles Icon"
+                                className="h-24 w-24 object-contain hidden sm:block animate-float-3d-slow filter drop-shadow-[0_10px_20px_rgba(168,85,247,0.4)]"
+                            />
                         </div>
 
                         <div className="mt-4 flex flex-wrap gap-2">
@@ -659,7 +674,7 @@ export default function LandingPage() {
             {/* INTERACTIVE WA NOTIF SIMULATOR WIDGET */}
             <section id="simulasi" className="relative z-10 py-16 bg-slate-900/50 border-y border-slate-800/80">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    
+
                     <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
                         <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
                             Uji Coba Simulator Interaktif
@@ -673,7 +688,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-5xl mx-auto">
-                        
+
                         {/* Control Panel (Left) */}
                         <div className="lg:col-span-5 bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4 relative overflow-hidden">
                             <div className="flex items-center justify-between">
@@ -719,11 +734,10 @@ export default function LandingPage() {
                                             key={item.id}
                                             type="button"
                                             onClick={() => setSimType(item.id as any)}
-                                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left truncate ${
-                                                simType === item.id
+                                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left truncate ${simType === item.id
                                                     ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
                                                     : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                                            }`}
+                                                }`}
                                         >
                                             {item.label}
                                         </button>
@@ -757,7 +771,7 @@ export default function LandingPage() {
                         {/* Simulated Phone Frame (Right) */}
                         <div className="lg:col-span-7 flex justify-center">
                             <div className="w-full max-w-sm rounded-[36px] bg-slate-900 p-3 border-4 border-slate-800 shadow-2xl relative overflow-hidden">
-                                
+
                                 {/* Phone Header Bar */}
                                 <div className="bg-[#075e54] text-white px-4 py-3 rounded-t-[28px] flex items-center gap-3">
                                     <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
@@ -771,7 +785,7 @@ export default function LandingPage() {
 
                                 {/* Chat Body */}
                                 <div className="bg-[#0b141a] p-4 min-h-[280px] flex flex-col justify-end gap-3 font-sans text-xs">
-                                    
+
                                     {/* Date Badge */}
                                     <div className="self-center bg-[#182229] text-[10px] text-slate-400 px-3 py-1 rounded-lg">
                                         HARI INI (REAL-TIME)
@@ -779,7 +793,7 @@ export default function LandingPage() {
 
                                     {/* Message Bubble */}
                                     <div className={`self-start max-w-[90%] bg-[#202c33] text-slate-100 p-3 rounded-2xl rounded-tl-none border border-slate-700/50 shadow-md relative ${simSending ? 'opacity-50 animate-pulse' : ''}`}>
-                                        
+
                                         <div className="text-[10px] text-emerald-400 font-bold mb-1 border-b border-slate-700/60 pb-1 flex items-center gap-1">
                                             <CheckCircle2 className="h-3 w-3" />
                                             <span>Notifikasi Resmi Sekolah</span>
@@ -844,7 +858,7 @@ export default function LandingPage() {
 
             {/* ROLE SHOWCASE MODUL */}
             <section id="peran" className="relative z-10 py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
+
                 <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
                     <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-400 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30">
                         Multi-Role Solution
@@ -865,11 +879,10 @@ export default function LandingPage() {
                             <button
                                 key={r.role}
                                 onClick={() => setActiveRole(idx)}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                                    activeRole === idx
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${activeRole === idx
                                         ? 'bg-slate-800 border-cyan-500 text-cyan-300 shadow-lg'
                                         : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
-                                }`}
+                                    }`}
                             >
                                 <Icon className="h-4 w-4" />
                                 <span>{r.role}</span>
@@ -916,7 +929,7 @@ export default function LandingPage() {
             {/* COMPARISON TABLE (Manual vs SIMAK PRO) */}
             <section id="komparasi" className="relative z-10 py-16 bg-slate-900/40 border-y border-slate-800/80">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    
+
                     <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
                         <span className="text-xs font-extrabold uppercase tracking-widest text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">
                             Mengapa Pilih SIMAK PRO?
@@ -980,7 +993,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    
+
                     <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 flex flex-col justify-between space-y-4 hover:-translate-y-1.5 transition-all">
                         <div className="space-y-2">
                             <div className="flex text-amber-400 gap-1">
@@ -1032,7 +1045,7 @@ export default function LandingPage() {
             {/* FAQ ACCORDION */}
             <section id="faq" className="relative z-10 py-16 bg-slate-900/40 border-t border-slate-800/80">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    
+
                     <div className="text-center space-y-2">
                         <span className="text-xs font-extrabold uppercase tracking-widest text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">
                             Pertanyaan Umum
@@ -1073,10 +1086,10 @@ export default function LandingPage() {
             {/* CTA BANNER & FOOTER WITH ANIMATED 3D ASSETS */}
             <footer className="relative z-10 bg-slate-950 border-t border-slate-800/80 pt-16 pb-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    
+
                     {/* Final CTA Banner Card */}
                     <div className="bg-gradient-to-r from-cyan-950/80 via-slate-900 to-blue-950/80 p-8 sm:p-12 rounded-3xl border border-cyan-500/30 text-center space-y-4 mb-16 relative overflow-hidden shadow-2xl">
-                        
+
                         {/* Background Animated Floating 3D Icons */}
                         <img src="/hero_3d_school.png" alt="3D School" className="h-36 w-36 object-contain absolute -left-6 -bottom-6 opacity-30 pointer-events-none animate-float-3d" />
                         <img src="/wa_3d_icon.png" alt="3D WA" className="h-32 w-32 object-contain absolute -right-4 -top-4 opacity-30 pointer-events-none animate-float-reverse" />

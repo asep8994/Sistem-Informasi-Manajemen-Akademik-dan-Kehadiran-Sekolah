@@ -24,7 +24,8 @@ import {
     AlertCircle,
     Download,
     Search,
-    FileSpreadsheet
+    FileSpreadsheet,
+    Award
 } from 'lucide-react';
 import { School, Student, User, ViolationType, NotificationLog } from '../types';
 
@@ -131,6 +132,7 @@ export default function AdminView() {
 
     // Sub-tab 3: Akun Guru & Staf states
     const [newStaffName, setNewStaffName] = useState('');
+    const [newStaffNip, setNewStaffNip] = useState('');
     const [newStaffUser, setNewStaffUser] = useState('');
     const [newStaffPass, setNewStaffPass] = useState('');
     const [newStaffRole, setNewStaffRole] = useState<'walas' | 'guru_bk' | 'guru_piket' | 'guru_mapel' | 'admin'>('guru_piket');
@@ -141,6 +143,7 @@ export default function AdminView() {
     // Edit staff modal states
     const [editingStaff, setEditingStaff] = useState<User | null>(null);
     const [editStaffName, setEditStaffName] = useState('');
+    const [editStaffNip, setEditStaffNip] = useState('');
     const [editStaffUser, setEditStaffUser] = useState('');
     const [editStaffPass, setEditStaffPass] = useState('');
     const [editStaffRole, setEditStaffRole] = useState<'walas' | 'guru_bk' | 'guru_piket' | 'guru_mapel' | 'admin'>('guru_piket');
@@ -167,6 +170,22 @@ export default function AdminView() {
     const [waRekapTpl, setWaRekapTpl] = useState('');
     const [emailRekapTpl, setEmailRekapTpl] = useState('');
 
+    // Rapor Config states
+    const [kepalaSekolahName, setKepalaSekolahName] = useState('');
+    const [kepalaSekolahNip, setKepalaSekolahNip] = useState('');
+    const [kepalaSekolahTte, setKepalaSekolahTte] = useState('');
+    const [tanggalRapor, setTanggalRapor] = useState('');
+    const [raporMapelText, setRaporMapelText] = useState('');
+    const [raporPaperSize, setRaporPaperSize] = useState<'A4' | 'F4' | 'Letter'>('A4');
+    const [raporPaperMargin, setRaporPaperMargin] = useState<'normal' | 'compact' | 'wide'>('normal');
+    const [raporKopJudul, setRaporKopJudul] = useState('');
+    const [raporLogo, setRaporLogo] = useState('');
+    const [kopLine1, setKopLine1] = useState('');
+    const [kopLine2, setKopLine2] = useState('');
+    const [kopLine3, setKopLine3] = useState('');
+    const [kopLine4, setKopLine4] = useState('');
+    const [kopLine5, setKopLine5] = useState('');
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -187,6 +206,35 @@ export default function AdminView() {
         setEmailSanksiTpl(currentSchool.notificationConfig.emailTemplatePelanggaran);
         setWaRekapTpl(currentSchool.notificationConfig.waTemplateRekap || '');
         setEmailRekapTpl(currentSchool.notificationConfig.emailTemplateRekap || '');
+
+        const rConf = currentSchool.raporConfig;
+        setKepalaSekolahName(rConf?.kepalaSekolahName || 'Drs. H. Ahmad Dahlan, M.Pd');
+        setKepalaSekolahNip(rConf?.kepalaSekolahNip || '19750812 200003 1 002');
+        setKepalaSekolahTte(rConf?.kepalaSekolahTte || '');
+        setTanggalRapor(rConf?.tanggalRapor || '24 Juli 2026');
+        setRaporPaperSize(rConf?.paperSize || 'A4');
+        setRaporPaperMargin(rConf?.paperMargin || 'normal');
+        setRaporKopJudul(rConf?.kopJudul || 'LAPORAN HASIL BELAJAR TENGAH SEMESTER (PTS / STS)');
+        setRaporLogo(rConf?.raporLogo || '');
+
+        setKopLine1(rConf?.kopLine1 !== undefined ? rConf.kopLine1 : 'PEMERINTAH KOTA DEPOK');
+        setKopLine2(rConf?.kopLine2 !== undefined ? rConf.kopLine2 : 'DINAS PENDIDIKAN');
+        setKopLine3(rConf?.kopLine3 !== undefined ? rConf.kopLine3 : `SMP NEGERI 20 DEPOK`);
+        setKopLine4(rConf?.kopLine4 !== undefined ? rConf.kopLine4 : 'Jl. Raya Sawangan No. 20, Pancoran Mas, Kota Depok, Jawa Barat 16436');
+        setKopLine5(rConf?.kopLine5 !== undefined ? rConf.kopLine5 : 'Website: smpn20depok.sch.id | Email: info@smpn20depok.sch.id');
+        const defaultMapelList = rConf?.mapelList || [
+            'Pendidikan Agama dan Budi Pekerti',
+            'Pendidikan Pancasila (PPKn)',
+            'Bahasa Indonesia',
+            'Matematika',
+            'Ilmu Pengetahuan Alam (IPA)',
+            'Ilmu Pengetahuan Sosial (IPS)',
+            'Bahasa Inggris',
+            'Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)',
+            'Seni dan Budaya',
+            'Informatika'
+        ];
+        setRaporMapelText(defaultMapelList.join('\n'));
 
         if (currentSchool.classes.length > 0) {
             setNewStudentClassId(currentSchool.classes[0].id);
@@ -521,7 +569,8 @@ export default function AdminView() {
             username,
             password,
             role: newStaffRole,
-            name
+            name,
+            nip: newStaffNip.trim() || undefined
         };
 
         if (newStaffRole === 'walas') {
@@ -536,6 +585,7 @@ export default function AdminView() {
         });
 
         setNewStaffName('');
+        setNewStaffNip('');
         setNewStaffUser('');
         setNewStaffPass('');
         setNewStaffMapelName('');
@@ -564,6 +614,7 @@ export default function AdminView() {
         const stAny = staff as any;
         setEditingStaff(staff);
         setEditStaffName(staff.name || '');
+        setEditStaffNip(staff.nip || '');
         setEditStaffUser(staff.username || '');
         setEditStaffPass(staff.password || '');
         setEditStaffRole(staff.role as any || 'guru_piket');
@@ -604,6 +655,7 @@ export default function AdminView() {
             const updated: User = {
                 ...u,
                 name,
+                nip: editStaffNip.trim() || undefined,
                 username,
                 password,
                 role: editStaffRole,
@@ -652,6 +704,56 @@ export default function AdminView() {
             logo: schoolLogo
         });
         showToast('Profil sekolah berhasil diperbarui!', 'success');
+    };
+
+    const handleTteUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setKepalaSekolahTte(event.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRaporLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setRaporLogo(event.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSaveRaporConfig = (e: React.FormEvent) => {
+        e.preventDefault();
+        const mapelList = raporMapelText
+            .split('\n')
+            .map(m => m.trim())
+            .filter(m => m.length > 0);
+
+        updateSchoolProperty({
+            raporConfig: {
+                kepalaSekolahName: kepalaSekolahName.trim(),
+                kepalaSekolahNip: kepalaSekolahNip.trim(),
+                kepalaSekolahTte: kepalaSekolahTte,
+                tanggalRapor: tanggalRapor.trim(),
+                mapelList,
+                paperSize: raporPaperSize,
+                paperMargin: raporPaperMargin,
+                kopJudul: raporKopJudul.trim(),
+                kopLine1: kopLine1.trim(),
+                kopLine2: kopLine2.trim(),
+                kopLine3: kopLine3.trim(),
+                kopLine4: kopLine4.trim(),
+                kopLine5: kopLine5.trim(),
+                raporLogo: raporLogo
+            }
+        });
+        showToast('Pengaturan Rapor Tengah Semester berhasil disimpan!', 'success');
     };
 
     const handleSwitchYear = (selectedKey: string) => {
@@ -1684,6 +1786,17 @@ export default function AdminView() {
                             />
                         </div>
 
+                        <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">NIP Guru / Staf (Opsional)</label>
+                            <input
+                                type="text"
+                                placeholder="Contoh: 19820514 200801 2 015"
+                                value={newStaffNip}
+                                onChange={(e) => setNewStaffNip(e.target.value)}
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500"
+                            />
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-[10px] font-bold text-slate-500 mb-1">Username</label>
@@ -1823,7 +1936,10 @@ export default function AdminView() {
                                     return (
                                         <tr key={st.id} className="hover:bg-slate-50/50 transition-colors">
                                             <td className="py-3 px-4 text-center text-slate-400 font-semibold">{index + 1}</td>
-                                            <td className="py-3 px-4 font-bold text-slate-800">{st.name}</td>
+                                            <td className="py-3 px-4 font-bold text-slate-800">
+                                                <div>{st.name}</div>
+                                                {st.nip && <div className="text-[10px] text-slate-400 font-medium">NIP: {st.nip}</div>}
+                                            </td>
                                             <td className="py-3 px-4 text-slate-600 font-medium">{st.username}</td>
                                             <td className="py-3 px-4">
                                                 <span className="inline-flex rounded-full bg-cyan-50 border border-cyan-100 px-2 py-0.5 text-[9px] font-bold text-[#0f4c81]">
@@ -1888,6 +2004,17 @@ export default function AdminView() {
                                         onChange={(e) => setEditStaffName(e.target.value)}
                                         className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
                                         required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-600 mb-1">NIP Guru / Staf (Opsional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Contoh: 19820514 200801 2 015"
+                                        value={editStaffNip}
+                                        onChange={(e) => setEditStaffNip(e.target.value)}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-cyan-500"
                                     />
                                 </div>
 
@@ -2248,6 +2375,246 @@ export default function AdminView() {
                                 className="w-full rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs py-2 transition-all active:scale-[0.98] shadow-sm"
                             >
                                 Simpan Template Pesan
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Pengaturan Khusus Rapor Tengah Semester */}
+                    <div className="lg:col-span-12 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+                        <div>
+                            <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <Award className="h-4.5 w-4.5 text-cyan-600" />
+                                <span>Pengaturan Khusus Rapor Tengah Semester</span>
+                            </h4>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Atur nama Kepala Sekolah, TTE, tanggal cetak rapor, dan daftar mata pelajaran.</p>
+                        </div>
+
+                        <form onSubmit={handleSaveRaporConfig} className="space-y-4 text-xs">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Nama Kepala Sekolah (Lengkap dengan Gelar)</label>
+                                    <input
+                                        type="text"
+                                        value={kepalaSekolahName}
+                                        onChange={(e) => setKepalaSekolahName(e.target.value)}
+                                        placeholder="Contoh: Drs. H. Ahmad Dahlan, M.Pd"
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">NIP Kepala Sekolah</label>
+                                    <input
+                                        type="text"
+                                        value={kepalaSekolahNip}
+                                        onChange={(e) => setKepalaSekolahNip(e.target.value)}
+                                        placeholder="Contoh: 19750812 200003 1 002"
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Tanggal Pembagian Rapor</label>
+                                    <input
+                                        type="text"
+                                        value={tanggalRapor}
+                                        onChange={(e) => setTanggalRapor(e.target.value)}
+                                        placeholder="Contoh: 24 Juli 2026"
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Tanda Tangan Elektronik (TTE) Kepala Sekolah</label>
+                                    <div className="flex items-center gap-3">
+                                        <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 py-1.5 px-3 text-xs font-medium text-slate-600 cursor-pointer shadow-sm active:scale-[0.98] transition-all">
+                                            <Upload className="h-3.5 w-3.5 text-slate-500" />
+                                            Upload File TTD / TTE
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleTteUpload}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                        {kepalaSekolahTte ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-10 w-24 rounded-lg border border-slate-200 bg-white p-1 flex items-center justify-center overflow-hidden">
+                                                    <img src={kepalaSekolahTte} alt="TTE Preview" className="max-h-full max-w-full object-contain" />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setKepalaSekolahTte('')}
+                                                    className="text-xs text-rose-500 hover:underline font-medium cursor-pointer"
+                                                >
+                                                    Hapus TTD
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <span className="text-[10px] text-slate-400">Belum ada TTD</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Pengaturan KOP Surat 5 Baris */}
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                                <div>
+                                    <h5 className="text-xs font-bold text-slate-700">Pengaturan Teks KOP Rapor (5 Baris Fleksibel)</h5>
+                                    <p className="text-[10px] text-slate-500">3 baris pertama tampil BOLD (tebal), 2 baris terakhir tampil REGULAR (tanpa bold).</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-600 mb-1">Baris 1 (BOLD - Instansi Atas)</label>
+                                        <input
+                                            type="text"
+                                            value={kopLine1}
+                                            onChange={(e) => setKopLine1(e.target.value)}
+                                            placeholder="PEMERINTAH KOTA DEPOK"
+                                            className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-3 text-xs font-bold text-slate-800 outline-none focus:border-cyan-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-600 mb-1">Baris 2 (BOLD - Dinas/Yayasan)</label>
+                                        <input
+                                            type="text"
+                                            value={kopLine2}
+                                            onChange={(e) => setKopLine2(e.target.value)}
+                                            placeholder="DINAS PENDIDIKAN"
+                                            className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-3 text-xs font-bold text-slate-800 outline-none focus:border-cyan-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-600 mb-1">Baris 3 (BOLD - Utama)</label>
+                                        <input
+                                            type="text"
+                                            value={kopLine3}
+                                            onChange={(e) => setKopLine3(e.target.value)}
+                                            placeholder="SMP NEGERI 20 DEPOK"
+                                            className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-3 text-xs font-bold text-slate-800 outline-none focus:border-cyan-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-[10px] font-semibold text-slate-600 mb-1">Baris 4 (REGULAR - Alamat Lengkap)</label>
+                                        <input
+                                            type="text"
+                                            value={kopLine4}
+                                            onChange={(e) => setKopLine4(e.target.value)}
+                                            placeholder="Jl. Raya Sawangan No. 20..."
+                                            className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-3 text-xs font-normal text-slate-700 outline-none focus:border-cyan-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-semibold text-slate-600 mb-1">Baris 5 (REGULAR - Kontak / Website / Email)</label>
+                                        <input
+                                            type="text"
+                                            value={kopLine5}
+                                            onChange={(e) => setKopLine5(e.target.value)}
+                                            placeholder="Website: ... | Email: ..."
+                                            className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-3 text-xs font-normal text-slate-700 outline-none focus:border-cyan-500"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Judul Utama Laporan Rapor (Di Bawah KOP)</label>
+                                    <input
+                                        type="text"
+                                        value={raporKopJudul}
+                                        onChange={(e) => setRaporKopJudul(e.target.value)}
+                                        placeholder="Contoh: LAPORAN HASIL BELAJAR TENGAH SEMESTER (PTS / STS)"
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Logo Khusus KOP Rapor (Opsional)</label>
+                                    <div className="flex items-center gap-3">
+                                        <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 py-1.5 px-3 text-xs font-medium text-slate-600 cursor-pointer shadow-sm active:scale-[0.98] transition-all">
+                                            <Upload className="h-3.5 w-3.5 text-slate-500" />
+                                            Upload Logo KOP
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleRaporLogoUpload}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                        {raporLogo ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-10 w-12 rounded-lg border border-slate-200 bg-white p-1 flex items-center justify-center overflow-hidden">
+                                                    <img src={raporLogo} alt="Rapor Logo Preview" className="max-h-full max-w-full object-contain" />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setRaporLogo('')}
+                                                    className="text-xs text-rose-500 hover:underline font-medium cursor-pointer"
+                                                >
+                                                    Hapus Logo
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <span className="text-[10px] text-slate-400">Gunakan logo profil sekolah (default)</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Ukuran Kertas Cetak Rapor</label>
+                                    <select
+                                        value={raporPaperSize}
+                                        onChange={(e) => setRaporPaperSize(e.target.value as any)}
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500"
+                                    >
+                                        <option value="A4">A4 (210 x 297 mm)</option>
+                                        <option value="F4">F4 / Folio (215 x 330 mm)</option>
+                                        <option value="Letter">Letter (216 x 279 mm)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Margin Halaman Cetak Rapor</label>
+                                    <select
+                                        value={raporPaperMargin}
+                                        onChange={(e) => setRaporPaperMargin(e.target.value as any)}
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-cyan-500"
+                                    >
+                                        <option value="normal">Normal (15 mm)</option>
+                                        <option value="compact">Hemat Tempat / Compact (10 mm)</option>
+                                        <option value="wide">Longgar / Wide (20 mm)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Daftar &amp; Urutan Mata Pelajaran Rapor (1 Mapel per Baris)</label>
+                                <textarea
+                                    rows={5}
+                                    value={raporMapelText}
+                                    onChange={(e) => setRaporMapelText(e.target.value)}
+                                    placeholder="Pendidikan Agama dan Budi Pekerti&#10;Pendidikan Pancasila (PPKn)&#10;Bahasa Indonesia&#10;Matematika..."
+                                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-semibold outline-none focus:border-cyan-500 text-slate-800"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs py-2 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+                            >
+                                Simpan Pengaturan Rapor
                             </button>
                         </form>
                     </div>

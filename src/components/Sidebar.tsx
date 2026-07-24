@@ -7,6 +7,7 @@ import {
     CalendarCheck, 
     AlertOctagon, 
     FileSpreadsheet, 
+    FileText,
     Users, 
     ShieldAlert, 
     UserCog, 
@@ -148,6 +149,14 @@ export default function Sidebar() {
                             {/* Reports view */}
                             {['admin', 'guru_bk', 'walas', 'guru_mapel', 'superadmin'].includes(currentUser.role) && (
                                 <NavLink page="laporan" label="Rekapitulasi Data" icon={FileSpreadsheet} />
+                            )}
+
+                            {/* Rapor & Legger for Admin & Walas */}
+                            {['admin', 'walas', 'superadmin'].includes(currentUser.role) && (
+                                <>
+                                    <NavLink page="rapor" label="Rapor Tengah Semester" icon={FileText} />
+                                    <NavLink page="legger" label="Legger Kelas" icon={FileSpreadsheet} />
+                                </>
                             )}
 
                             {/* Parent Notification Panel for Admin & Guru BK */}
