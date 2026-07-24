@@ -259,31 +259,88 @@ export default function RaporView() {
             return subjRel.toLowerCase() === studentAgama.toLowerCase();
         });
 
-        // Subject Grades & TP
+        // Subject Grades & TP — Calculate Nilai Akhir (weighted across assessment categories)
         const subjectReportData = filteredSubjects.map(subject => {
             const entries = (currentSchool.nilaiMapel || []).filter(
                 n => n.classId === selectedClassId && n.subject === subject
             );
 
-            let finalScore: number | null = null;
-            let scoreSum = 0;
-            let scoreCount = 0;
+            // Categorize entries
+            const tugasScores: number[] = [];
+            const uhScores: number[] = [];
+            const utsScores: number[] = [];
+            const uasScores: number[] = [];
+            const allScores: number[] = [];
 
             entries.forEach(entry => {
                 const val = entry.grades?.[student.id];
                 if (typeof val === 'number' && !isNaN(val)) {
-                    scoreSum += val;
-                    scoreCount++;
+                    allScores.push(val);
+                    const typeLower = (entry.assessmentType || '').toLowerCase();
+                    if (typeLower.startsWith('tugas') || typeLower.startsWith('kuis')) {
+                        tugasScores.push(val);
+                    } else if (typeLower.startsWith('ulangan harian') || typeLower.startsWith('uh')) {
+                        uhScores.push(val);
+                    } else if (typeLower.startsWith('uts') || typeLower.startsWith('pts')) {
+                        utsScores.push(val);
+                    } else if (typeLower.startsWith('uas') || typeLower.startsWith('pas') || typeLower.startsWith('pat')) {
+                        uasScores.push(val);
+                    } else {
+                        tugasScores.push(val);
+                    }
                 }
             });
 
-            if (scoreCount > 0) {
-                finalScore = Math.round(scoreSum / scoreCount);
+            let finalScore: number | null = null;
+
+            if (allScores.length > 0) {
+                let wTugas = 20, wUh = 30, wUts = 20, wUas = 30;
+                if (typeof window !== 'undefined') {
+                    const savedWeights = localStorage.getItem(`bobot_admin_${selectedClassId}_${subject}`) ||
+                                         localStorage.getItem(`bobot_guru_${selectedClassId}_${subject}`);
+                    if (savedWeights) {
+                        try {
+                            const parsed = JSON.parse(savedWeights);
+                            wTugas = parsed.tugas ?? 20;
+                            wUh = parsed.uh ?? 30;
+                            wUts = parsed.uts ?? 20;
+                            wUas = parsed.uas ?? 30;
+                        } catch {}
+                    }
+                }
+
+                const avgTugas = tugasScores.length > 0 ? tugasScores.reduce((a, b) => a + b, 0) / tugasScores.length : null;
+                const avgUh = uhScores.length > 0 ? uhScores.reduce((a, b) => a + b, 0) / uhScores.length : null;
+                const avgUts = utsScores.length > 0 ? utsScores.reduce((a, b) => a + b, 0) / utsScores.length : null;
+                const avgUas = uasScores.length > 0 ? uasScores.reduce((a, b) => a + b, 0) / uasScores.length : null;
+
+                let totalWeightUsed = 0;
+                let weightedSum = 0;
+
+                if (avgTugas !== null) { weightedSum += avgTugas * wTugas; totalWeightUsed += wTugas; }
+                if (avgUh !== null) { weightedSum += avgUh * wUh; totalWeightUsed += wUh; }
+                if (avgUts !== null) { weightedSum += avgUts * wUts; totalWeightUsed += wUts; }
+                if (avgUas !== null) { weightedSum += avgUas * wUas; totalWeightUsed += wUas; }
+
+                if (totalWeightUsed > 0) {
+                    finalScore = Math.round(weightedSum / totalWeightUsed);
+                } else {
+                    finalScore = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
+                }
             }
 
-            const tps = (currentSchool.tujuanPembelajaran || []).filter(
-                tp => tp.classId === selectedClassId && tp.subject === subject
+            const rawSubjectTps = (currentSchool.tujuanPembelajaran || []).filter(
+                tp => tp.subject.toLowerCase() === subject.toLowerCase()
             );
+            const tps: typeof rawSubjectTps = [];
+            const seenDescsRapor = new Set<string>();
+            for (const tp of rawSubjectTps) {
+                const key = tp.description.trim().toLowerCase();
+                if (!seenDescsRapor.has(key)) {
+                    seenDescsRapor.add(key);
+                    tps.push(tp);
+                }
+            }
             const ketuntasan = currentSchool.ketuntasanTP?.[selectedClassId]?.[subject]?.[student.id] || {};
 
             let deskripsi = '';
@@ -292,7 +349,11 @@ export default function RaporView() {
                 const perluBimbinganList: string[] = [];
 
                 tps.forEach(tp => {
-                    const status = ketuntasan[tp.id];
+                    let status = ketuntasan[tp.id];
+                    if (!status && finalScore !== null) {
+                        status = finalScore >= 75 ? 'tuntas' : 'perlu_bimbingan';
+                    }
+
                     if (status === 'tuntas') {
                         tuntasList.push(tp.description);
                     } else if (status === 'perlu_bimbingan') {
@@ -302,19 +363,36 @@ export default function RaporView() {
 
                 const parts: string[] = [];
                 if (tuntasList.length > 0) {
-                    parts.push(`Menunjukkan penguasaan yang baik dalam ${tuntasList.join(', ')}.`);
+                    parts.push(`Mencapai kompetensi dengan sangat baik dalam hal ${tuntasList.join(', ')}.`);
                 }
                 if (perluBimbinganList.length > 0) {
-                    parts.push(`Perlu bimbingan lebih lanjut dalam ${perluBimbinganList.join(', ')}.`);
+                    parts.push(`Perlu peningkatan dalam hal ${perluBimbinganList.join(', ')}.`);
                 }
 
                 deskripsi = parts.join(' ');
             }
 
             if (!deskripsi && finalScore !== null) {
-                if (finalScore >= 80) deskripsi = 'Menunjukkan penguasaan materi pembelajaran yang sangat baik.';
-                else if (finalScore >= 70) deskripsi = 'Menunjukkan penguasaan materi pembelajaran yang baik.';
-                else deskripsi = 'Perlu bimbingan dan peningkatan pemahaman materi pembelajaran.';
+                // Fallback: TP exists but guru hasn't set T/R status yet — use TP descriptions
+                if (tps.length > 0) {
+                    const allTpDescs = tps.map(tp => tp.description).filter(Boolean);
+                    if (allTpDescs.length > 0) {
+                        if (finalScore >= 75) {
+                            deskripsi = `Mencapai kompetensi dengan sangat baik dalam hal ${allTpDescs.join(', ')}.`;
+                        } else {
+                            deskripsi = `Perlu peningkatan dalam hal ${allTpDescs.join(', ')}.`;
+                        }
+                    } else {
+                        deskripsi = finalScore >= 75
+                            ? 'Mencapai kompetensi dengan sangat baik.'
+                            : 'Perlu peningkatan dalam pembelajaran.';
+                    }
+                } else {
+                    // No TPs at all for this subject
+                    deskripsi = finalScore >= 75
+                        ? 'Mencapai kompetensi dengan sangat baik.'
+                        : 'Perlu peningkatan dalam pembelajaran.';
+                }
             } else if (!deskripsi) {
                 deskripsi = 'Belum ada data penilaian.';
             }
@@ -419,7 +497,7 @@ export default function RaporView() {
                                 <tr className="bg-gray-100 text-gray-800">
                                     <th className="border border-gray-300 px-3 py-2 w-10 text-center">No</th>
                                     <th className="border border-gray-300 px-3 py-2 text-left">Mata Pelajaran</th>
-                                    <th className="border border-gray-300 px-2 py-2 w-24 text-center">Nilai PTS</th>
+                                    <th className="border border-gray-300 px-2 py-2 w-24 text-center">Nilai Akhir</th>
                                     <th className="border border-gray-300 px-3 py-2 text-left">Capaian & Ketuntasan Tujuan Pembelajaran (TP)</th>
                                 </tr>
                             </thead>
@@ -557,7 +635,7 @@ export default function RaporView() {
                         <div className="flex flex-col justify-between h-[160px]">
                             <div>
                                 <p className="text-gray-600">Depok, {reportDate}</p>
-                                <p className="font-semibold text-gray-800">Wali Kelas {currentClass?.name}</p>
+                                <p className="font-semibold text-gray-800">Wali Kelas</p>
                             </div>
                             <div className="flex-1 flex items-center justify-center py-1" />
                             <div>
@@ -625,17 +703,15 @@ export default function RaporView() {
                         <div className="flex bg-gray-100 p-1 rounded-lg">
                             <button
                                 onClick={() => setIsBulkViewMode(false)}
-                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
-                                    !isBulkViewMode ? 'bg-white text-navy-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${!isBulkViewMode ? 'bg-white text-navy-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                             >
                                 Single Siswa
                             </button>
                             <button
                                 onClick={() => setIsBulkViewMode(true)}
-                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
-                                    isBulkViewMode ? 'bg-white text-navy-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${isBulkViewMode ? 'bg-white text-navy-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                             >
                                 Seluruh Kelas ({students.length})
                             </button>
@@ -648,16 +724,15 @@ export default function RaporView() {
                     <button
                         onClick={isBulkViewMode ? handleExportBulkPdf : handleExportSinglePdf}
                         disabled={isExporting || (isBulkViewMode ? students.length === 0 : !selectedStudent)}
-                        className={`flex items-center gap-2 font-bold px-5 py-2.5 rounded-xl text-xs transition-all shadow-sm active:scale-95 cursor-pointer ${
-                            isBulkViewMode 
-                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                                : 'bg-[#0f4c81] hover:bg-navy-700 text-white'
-                        }`}
+                        className={`flex items-center gap-2 font-bold px-5 py-2.5 rounded-xl text-xs transition-all shadow-sm active:scale-95 cursor-pointer ${isBulkViewMode
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            : 'bg-[#0f4c81] hover:bg-navy-700 text-white'
+                            }`}
                     >
                         {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                         <span>
-                            {isBulkViewMode 
-                                ? `Ekspor PDF Seluruh Kelas (${students.length} Siswa)` 
+                            {isBulkViewMode
+                                ? `Ekspor PDF Seluruh Kelas (${students.length} Siswa)`
                                 : `Ekspor PDF Rapor (${selectedStudent?.name || 'Siswa'})`}
                         </span>
                     </button>

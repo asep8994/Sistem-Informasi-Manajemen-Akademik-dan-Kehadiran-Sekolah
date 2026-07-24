@@ -40,8 +40,12 @@ export default function MapelNilaiView() {
         if (prefClass && assignedIds.includes(prefClass)) {
             setSelectedClassId(prefClass);
             sessionStorage.removeItem('mapel_pref_class');
-        } else if (assignedClasses.length > 0) {
-            setSelectedClassId(assignedClasses[0].id);
+        } else {
+            setSelectedClassId(prev => {
+                const isValid = assignedClasses.some(c => c.id === prev);
+                if (prev && isValid) return prev;
+                return assignedClasses.length > 0 ? assignedClasses[0].id : '';
+            });
         }
     }, [currentSchool, currentUser]);
 
@@ -93,10 +97,19 @@ export default function MapelNilaiView() {
     }
     students.sort((a, b) => a.name.localeCompare(b.name));
 
-    // Get TPs for this class & mapel
-    const currentTps = (currentSchool.tujuanPembelajaran || []).filter(
-        tp => tp.classId === selectedClassId && tp.subject === mapelName
+    // Get TPs for this mapel (synced automatically across all classes)
+    const rawTps = (currentSchool.tujuanPembelajaran || []).filter(
+        tp => tp.subject.toLowerCase() === mapelName.toLowerCase()
     );
+    const currentTps: TujuanPembelajaran[] = [];
+    const seenDescsMapel = new Set<string>();
+    for (const tp of rawTps) {
+        const key = tp.description.trim().toLowerCase();
+        if (!seenDescsMapel.has(key)) {
+            seenDescsMapel.add(key);
+            currentTps.push(tp);
+        }
+    }
 
     const handleGradeChange = (studentId: string, value: string) => {
         if (value === '') {
@@ -545,7 +558,15 @@ export default function MapelNilaiView() {
                                                 <td className="py-3.5 px-4 font-bold text-slate-800">{student.name}</td>
 
                                                 {currentTps.map(tp => {
-                                                    const ketuntasan = currentSchool.ketuntasanTP?.[selectedClassId]?.[mapelName]?.[student.id]?.[tp.id] || 'tuntas';
+                                                    const studentGradesList = (currentSchool.nilaiMapel || [])
+                                                        .filter(n => n.classId === selectedClassId && n.subject === mapelName)
+                                                        .map(n => n.grades?.[student.id])
+                                                        .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+                                                    const studentAvg = studentGradesList.length > 0
+                                                        ? Math.round(studentGradesList.reduce((a, b) => a + b, 0) / studentGradesList.length)
+                                                        : null;
+                                                    const savedKetuntasan = currentSchool.ketuntasanTP?.[selectedClassId]?.[mapelName]?.[student.id]?.[tp.id];
+                                                    const ketuntasan = savedKetuntasan || ((studentAvg !== null && studentAvg < 75) ? 'perlu_bimbingan' : 'tuntas');
                                                     const isTuntas = ketuntasan === 'tuntas';
                                                     return (
                                                         <td key={tp.id} className="py-3.5 px-4 text-center">

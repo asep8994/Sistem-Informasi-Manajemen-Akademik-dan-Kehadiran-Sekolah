@@ -34,6 +34,7 @@ export default function LaporanView() {
     const [weightUh, setWeightUh] = useState<string | number>(30);
     const [weightUts, setWeightUts] = useState<string | number>(20);
     const [weightUas, setWeightUas] = useState<string | number>(30);
+    const [weightSaved, setWeightSaved] = useState(false);
 
     // KKM Ketercapaian threshold
     const [kkmScore, setKkmScore] = useState<string | number>(75);
@@ -43,6 +44,25 @@ export default function LaporanView() {
             const mapel = currentUser.mapelName || 'Mata Pelajaran';
             const saved = localStorage.getItem(`kkm_${currentUser.username}_${selectedClassId}_${mapel}`);
             setKkmScore(saved ? Number(saved) : 75);
+
+            // Load saved weight config
+            const weightKey = `bobot_${currentUser.username}_${selectedClassId}_${mapel}`;
+            const savedWeights = localStorage.getItem(weightKey);
+            if (savedWeights) {
+                try {
+                    const parsed = JSON.parse(savedWeights);
+                    setWeightTugas(parsed.tugas ?? 20);
+                    setWeightUh(parsed.uh ?? 30);
+                    setWeightUts(parsed.uts ?? 20);
+                    setWeightUas(parsed.uas ?? 30);
+                } catch { /* ignore parse error */ }
+            } else {
+                setWeightTugas(20);
+                setWeightUh(30);
+                setWeightUts(20);
+                setWeightUas(30);
+            }
+            setWeightSaved(false);
         }
     }, [selectedClassId, currentUser]);
 
@@ -780,12 +800,38 @@ export default function LaporanView() {
                                 </div>
                             </div>
 
-                            {/* Verification info bar */}
-                            <div className="pt-2">
+                            {/* Save button & Verification info bar */}
+                            <div className="pt-2 space-y-3">
+                                <button
+                                    type="button"
+                                    disabled={!isWeightValid}
+                                    onClick={() => {
+                                        if (!isWeightValid) {
+                                            showToast('Total bobot harus tepat 100% sebelum menyimpan!', 'warning');
+                                            return;
+                                        }
+                                        if (typeof window !== 'undefined' && currentUser && selectedClassId) {
+                                            const mapel = currentUser.mapelName || 'Mata Pelajaran';
+                                            const weightKey = `bobot_${currentUser.username}_${selectedClassId}_${mapel}`;
+                                            localStorage.setItem(weightKey, JSON.stringify({
+                                                tugas: Number(weightTugas),
+                                                uh: Number(weightUh),
+                                                uts: Number(weightUts),
+                                                uas: Number(weightUas)
+                                            }));
+                                            setWeightSaved(true);
+                                            showToast('Konfigurasi bobot nilai berhasil disimpan!', 'success');
+                                        }
+                                    }}
+                                    className="w-full rounded-lg bg-cyan-700 hover:bg-cyan-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs py-2.5 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+                                >
+                                    Simpan Perubahan Bobot
+                                </button>
+
                                 {isWeightValid ? (
                                     <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-100 p-3 text-xs text-emerald-600">
                                         <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
-                                        <span>Persentase bobot valid (Akumulasi: {totalWeight}%). Logika perhitungan rata-rata terbobot siap.</span>
+                                        <span>Persentase bobot valid (Akumulasi: {totalWeight}%). {weightSaved ? 'Perubahan tersimpan.' : 'Klik tombol di atas untuk menyimpan.'}</span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-100 p-3 text-xs text-red-600">

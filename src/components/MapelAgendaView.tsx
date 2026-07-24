@@ -25,8 +25,12 @@ export default function MapelAgendaView() {
     }
 
     useEffect(() => {
-        if (assignedClasses.length > 0) setSelectedClassId(assignedClasses[0].id);
-        setSelectedDate(new Date().toISOString().slice(0, 10));
+        setSelectedClassId(prev => {
+            const isValid = assignedClasses.some(c => c.id === prev);
+            if (prev && isValid) return prev;
+            return assignedClasses.length > 0 ? assignedClasses[0].id : '';
+        });
+        setSelectedDate(prev => prev || new Date().toISOString().slice(0, 10));
     }, [currentSchool, currentUser]);
 
     if (!currentSchool || !currentUser || !appData) return null;

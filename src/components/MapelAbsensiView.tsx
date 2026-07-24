@@ -30,11 +30,15 @@ export default function MapelAbsensiView() {
         if (prefClass && assignedIds.includes(prefClass)) {
             setSelectedClassId(prefClass);
             sessionStorage.removeItem('mapel_pref_class');
-        } else if (assignedClasses.length > 0) {
-            setSelectedClassId(assignedClasses[0].id);
+        } else {
+            setSelectedClassId(prev => {
+                const isValid = assignedClasses.some(c => c.id === prev);
+                if (prev && isValid) return prev;
+                return assignedClasses.length > 0 ? assignedClasses[0].id : '';
+            });
         }
 
-        setSelectedDate(new Date().toISOString().slice(0, 10));
+        setSelectedDate(prev => prev || new Date().toISOString().slice(0, 10));
     }, [currentSchool, currentUser]);
 
     // Load saved attendance data into local state
